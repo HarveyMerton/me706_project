@@ -6,17 +6,18 @@ int r = 0;    //indicator for reading builtin encoder to avoid the reading redun
 float er;     //Proportional error for PI controller
 float eri;    //Integral error for PI controller
 
-
-
-
 int t=0;    //time in ms
 int t0=0;   //memory for time in ms
 
-
-
-
 int finish=0;  //finish indicator
 int rep=1;     //Repetition indicator
+
+//Voltage thresholds 
+int V_A1 = 0;
+int V_A2 = 0; 
+int V_A3 = 0; 
+int V_A4 = 0; 
+int V_A5 = 0; 
 
 
 
