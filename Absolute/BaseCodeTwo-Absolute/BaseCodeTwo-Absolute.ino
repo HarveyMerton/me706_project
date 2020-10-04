@@ -44,7 +44,6 @@ float kp = .6*90/deg;                         //proportional gain of PI
 float ki = .02;                               //integral gain of PI 
 
 
-
 //          MSB  A0  A1  A2  A3  A4  LSB
 int fence[5] = {100,100,100,100,100}
 //
@@ -145,11 +144,11 @@ finish=1;             //cghanging finish indicator
 if (finish==1){                                //this part of the code is for displaying the result
       delay(500);                              //half second delay
       rep=rep+1;                               // increasing the repetition indicator
-      Serial.print("shaft possition from optical absolute sensor from home position: ");
-      Serial.println(0);
+      Serial.print("shaft position from optical absolute sensor from home position: ");
+      Serial.println(count);
       
-      Serial.print("shaft displacement from optical absolute sensor: ");
-      Serial.println(0);
+      Serial.print("shaft displacement from optical absolute sensor: "); //Degrees
+      Serial.println(count * 360 / 32);
       
       Serial.print("Shaft displacement from motor's builtin encoder: ");
       Serial.println(s * 360 / 228);                                      //every full Revolution of the shaft is associated with 228 counts of builtin 
