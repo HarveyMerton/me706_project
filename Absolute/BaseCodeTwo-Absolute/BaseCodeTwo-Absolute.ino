@@ -13,13 +13,11 @@ int finish=0;  //finish indicator
 int rep=1;     //Repetition indicator
 
 //Voltage thresholds 
-int V_A1 = 0;
-int V_A2 = 0; 
-int V_A3 = 0; 
-int V_A4 = 0; 
-int V_A5 = 0; 
-
-
+//int V_A1 = 0;
+//int V_A2 = 0; 
+//int V_A3 = 0; 
+//int V_A4 = 0; 
+//int V_A5 = 0; 
 
 
 void setup() {
@@ -47,15 +45,62 @@ float ki = .02;                               //integral gain of PI
 
 
 
+//          MSB  A0  A1  A2  A3  A4  LSB
+int fence[5] = {100,100,100,100,100}
+//
+//int GrayToBinary(int num)
+//{
+//    num ^= num >> 16;
+//    num ^= num >>  8;
+//    num ^= num >>  4;
+//    num ^= num >>  2;
+//    num ^= num >>  1;
+//    return num;
+//}
 
+//Function to convert a Gray code input to a binary/decimal number
+int GrayToBinary(int g){ 
+  int b = 0; //Initialise binary number at 0
 
+  for(; g; g>>1){ //While g!=0, bit shifts g to the right every iteration 
+    b ^= g; //Bit b_x are XOR of bits g_x with all bits left of g_x
+  }
+    return b;
+}
+
+int readSensors(){
+
+  int output = B0
+
+  if (analogRead(A0) > fence[0]){
+    output |= (1 << 4)
+  }
+  if (analogRead(A1) > fence[1]){
+    output |= (1 << 3)
+  }
+  if (analogRead(A2) > fence[2]){
+    output |= (1 << 2)
+  }
+  if (analogRead(A3) > fence[3]){
+    output |= (1 << 1)
+  }
+  if (analogRead(A4) > fence[4]){
+    output |= (1 << 0)
+  }
+
+  return output;
+}
+
+int count = 0;
+
+int previous_gray = 0;
 
 void loop() {
   // put your main code here, to run repeatedly:
+  int sensor_reading_gray = readSensors();
 
-
-
-
+  if (previous_gray != sensor_reading_gray) count++;
+  previous_gray = sensor_reading_gray;
 
     
 t=millis();                 //reading time
@@ -80,14 +125,9 @@ if (t%10==0)                                      //PI controller that runs ever
     delay(1);
 }
 
-
-
     sm1 = digitalRead(7);         //reading chanel 1 
     sm2 = digitalRead(8);         //reading chanel 2
 
-    
-    
-    
     if (sm1 != sm2 && r == 0) {                                      //counting the number changes for both chanels
       s = s + 1;
       r = 1;                                                         // this indicator wont let this condition, (sm1 != sm2), to be counted until the next condition, (sm1 == sm2), happens
@@ -96,9 +136,6 @@ if (t%10==0)                                      //PI controller that runs ever
       s = s + 1;
       r = 0;                                                         // this indicator wont let this condition, (sm1 == sm2), to be counted until the next condition, (sm1 != sm2), happens
     }
-
-
-
 
 t=millis();           //updating time
 finish=1;             //cghanging finish indicator
@@ -123,6 +160,7 @@ if (finish==1){                                //this part of the code is for di
       Serial.println(Error);                                              //displaying error
       Serial.println();
       s = 0;
+      count = 0;
       finish=0; 
 }
 analogWrite(6,0);                                                         //turning off the motor
