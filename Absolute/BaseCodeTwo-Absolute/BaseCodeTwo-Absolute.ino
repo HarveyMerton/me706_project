@@ -12,12 +12,11 @@ int t0=0;   //memory for time in ms
 int finish=0;  //finish indicator
 int rep=1;     //Repetition indicator
 
-//Voltage thresholds 
-//int V_A1 = 0;
-//int V_A2 = 0; 
-//int V_A3 = 0; 
-//int V_A4 = 0; 
-//int V_A5 = 0; 
+int pos1 = 0;
+
+int pos2 = 0;
+
+
 
 
 void setup() {
@@ -36,7 +35,9 @@ void setup() {
   {
     analogWrite(3,255);                                                   //change the direction of rotation by applying voltage to pin 3 of arduino
   }
-  deg=abs(deg);                                       
+  deg=abs(deg);   
+
+                               pos1 = GrayToBinary(readSensors());
 }
 
 
@@ -45,7 +46,8 @@ float ki = .02;                               //integral gain of PI
 
 
 //          MSB  A0  A1  A2  A3  A4  LSB
-int fence[5] = {666,518,520,464,509};
+//int fence[5] = {666,518,520,464,509};
+int fence[5] = {41,40,39,41,41};
 //
 //int GrayToBinary(int num)
 //{
@@ -68,24 +70,33 @@ int fence[5] = {666,518,520,464,509};
 //    return b;
 //}
 
+int GrayToBinary(int g) {
+    int b = 0; //Initialise binary number at 0
+
+    while(g != 0) {  
+        b ^= g; //Bit b_x are XOR of bits g_x with all bits left of g_x
+        g = (g >> 1); ////Bit shifts g to the right every iteration
+    }
+    return b;
+}
 int readSensors(){
 
   int output = B0;
 
   if (analogRead(A1) > fence[0]){
-    output |= (1 << 4);
+    output |= (1 << 0);
   }
   if (analogRead(A2) > fence[1]){
-    output |= (1 << 3);
+    output |= (1 << 1);
   }
   if (analogRead(A3) > fence[2]){
     output |= (1 << 2);
   }
   if (analogRead(A4) > fence[3]){
-    output |= (1 << 1);
+    output |= (1 << 3);
   }
   if (analogRead(A5) > fence[4]){
-    output |= (1 << 0);
+    output |= (1 << 4);
   }
 
   return output;
@@ -98,6 +109,10 @@ float error_total = 0;
 int previous_gray = 0;
 
 int errors[10] = {0,0,0,0,0,0,0,0,0,0};
+
+int isOverflow = 0;
+
+int direction_count = 0;
 
 
 void sort(int a[], int size) {
@@ -135,6 +150,9 @@ t0=t;                       //sving the current time in memory
  // Serial.println(sensor_reading_gray);
 
   if (previous_gray != sensor_reading_gray) count++;
+  if (previous_gray != sensor_reading_gray && GrayToBinary(previous_gray) < GrayToBinary(sensor_reading_gray)) direction_count++;
+  if (previous_gray != sensor_reading_gray && GrayToBinary(previous_gray) > GrayToBinary(sensor_reading_gray)) direction_count--;
+  
   previous_gray = sensor_reading_gray;
     
 if (t%10==0)                                      //PI controller that runs every 10ms
@@ -171,20 +189,29 @@ finish=1;             //cghanging finish indicator
 
   }
 
-if (finish==1){                                //this part of the code is for displaying the result
+if (finish==1){   
+
+
+      pos2 = GrayToBinary(readSensors());
+      Serial.print("pos2: ");
+      Serial.println(pos2);
+      
+      Serial.print("direction: ");
+      Serial.println(direction_count>0?"CW (+)":"CCW (-)");
+  //this part of the code is for displaying the result
       delay(500);                              //half second delay
       rep=rep+1;                               // increasing the repetition indicator
       Serial.print("shaft position from optical absolute sensor from home position: ");
-      Serial.println(count);
+      Serial.println(abs(pos2-pos1));
       
       Serial.print("shaft displacement from optical absolute sensor: "); //Degrees
-      Serial.println(count * 360 / 32);
+      Serial.println(abs(pos2-pos1) * 360 / 32);
       
       Serial.print("Shaft displacement from motor's builtin encoder: ");
       Serial.println(s * 360 / 228);                                      //every full Revolution of the shaft is associated with 228 counts of builtin 
                                                                           //encoder so to turn it to degre we can use this formula (s * 360 / 228), "s" is the number of  built-in encoder counts
       
-      float Error=(count * 360 / 32)-s*360/228;
+      float Error=(abs(pos2-pos1) * 360 / 32)-s*360/228;
 
       errors[rep-1-1] = abs(Error);
       Serial.print("Error :");
@@ -194,7 +221,9 @@ if (finish==1){                                //this part of the code is for di
       count = 0;
       finish=0; 
 
-if (rep == 10){
+      pos1 = pos2;
+
+if (rep == 11){
   Serial.print("Average: ");
   sort(errors, 10);
   Serial.println(average(errors, 8)); 
