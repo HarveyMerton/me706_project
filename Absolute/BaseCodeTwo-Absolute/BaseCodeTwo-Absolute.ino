@@ -37,7 +37,7 @@ void setup() {
   }
   deg=abs(deg);   
 
-                               pos1 = GrayToBinary(readSensors());
+  pos1 = GrayToBinary(readSensors());
 }
 
 
@@ -135,6 +135,22 @@ float average (int * array, int len)  // assuming array is int.
   return  ((float) sum) / len ;  // average will be fractional, so float may be appropriate.
 }
 
+int valuesChanged[32] = {99};
+
+int valuesChanges_index = 0;
+
+int valueinarray(int val, int arr[])
+{
+    int i;
+    for(i = 0; i < 32; i++)
+    {
+        if(arr[i] == val)
+            return 1;
+    }
+    return 0;
+
+//  for(int i = 0; 
+}
 void loop() {
   // put your main code here, to run repeatedly:
 
@@ -152,6 +168,12 @@ t0=t;                       //sving the current time in memory
   if (previous_gray != sensor_reading_gray) count++;
   if (previous_gray != sensor_reading_gray && GrayToBinary(previous_gray) < GrayToBinary(sensor_reading_gray)) direction_count++;
   if (previous_gray != sensor_reading_gray && GrayToBinary(previous_gray) > GrayToBinary(sensor_reading_gray)) direction_count--;
+
+  if (previous_gray != sensor_reading_gray && !valueinarray(GrayToBinary(sensor_reading_gray), valuesChanged)){
+    
+    valuesChanged[valuesChanges_index] = GrayToBinary(sensor_reading_gray);
+    valuesChanges_index++;
+  }
   
   previous_gray = sensor_reading_gray;
     
@@ -193,33 +215,55 @@ if (finish==1){
 
 
       pos2 = GrayToBinary(readSensors());
-      Serial.print("pos2: ");
-      Serial.println(pos2);
+      //Serial.print("pos2: ");
+      //Serial.println(pos2);
       
-      Serial.print("direction: ");
-      Serial.println(direction_count>0?"CW (+)":"CCW (-)");
+
   //this part of the code is for displaying the result
       delay(500);                              //half second delay
       rep=rep+1;                               // increasing the repetition indicator
-      Serial.print("shaft position from optical absolute sensor from home position: ");
-      Serial.println(abs(pos2-pos1));
+      //Serial.print("shaft position from optical absolute sensor from home position: ");
+      //Serial.println(abs(pos2-pos1));
+
       
-      Serial.print("shaft displacement from optical absolute sensor: "); //Degrees
-      Serial.println(abs(pos2-pos1) * 360 / 32);
       
-      Serial.print("Shaft displacement from motor's builtin encoder: ");
-      Serial.println(s * 360 / 228);                                      //every full Revolution of the shaft is associated with 228 counts of builtin 
+      
+                                   Serial.print("shaft displacement from optical absolute sensor: "); //Degrees                //every full Revolution of the shaft is associated with 228 counts of builtin 
                                                                           //encoder so to turn it to degre we can use this formula (s * 360 / 228), "s" is the number of  built-in encoder counts
       
-      float Error=(abs(pos2-pos1) * 360 / 32)-s*360/228;
+      float Error=0;
 
-      errors[rep-1-1] = abs(Error);
+      float index_count = (abs(valuesChanges_index) * 360 / 32)-s*360/228;
+      float position_count = (abs(pos2-pos1) * 360 / 32)-s*360/228;
+
+      if (abs(index_count) > abs(position_count)){
+          errors[rep-1-1] = abs(position_count);
+          Error = position_count;
+
+Serial.print("(position count) ");
+      Serial.println(abs(pos2-pos1) * 360 / 32);
+
+      } else {
+          errors[rep-1-1] = abs(index_count);
+          Error = index_count;
+          Serial.print("(index count) ");
+              Serial.println(abs(valuesChanges_index) * 360 / 32);
+      }
+
+       
+      
+      Serial.print("Shaft displacement from motor's builtin encoder: ");
+      Serial.println(s * 360 / 228);  
+
+
+      //errors[rep-1-1] = abs(Error);
       Serial.print("Error :");
       Serial.println(Error);                                              //displaying error
       Serial.println();
       s = 0;
       count = 0;
       finish=0; 
+      valuesChanges_index = 0;
 
       pos1 = pos2;
 
@@ -227,6 +271,9 @@ if (rep == 11){
   Serial.print("Average: ");
   sort(errors, 10);
   Serial.println(average(errors, 8)); 
+
+      Serial.print("direction: ");
+      Serial.println(direction_count>0?"CW (+)":"CCW (-)");
 }
       
 }
