@@ -51,6 +51,8 @@ void setup() {
   RPM = Serial.readString().toFloat();  //Read User Input
   if (RPM < 0) {analogWrite(3, 255);}   //Motor Rotation
   RPM = abs(RPM);
+
+  
 }
 
 
@@ -64,7 +66,7 @@ void loop() {
     if (b%13 == 0 && repc == 1) {
       eri = ki * (RPM - rpmm) + eri;
       ctrl = 50 + kp * (RPM - rpmm) + eri;
-      Serial.print(ctrl);
+      //Serial.print(ctrl);
       analogWrite(6, ctrl);
       repc = 0;
     }
@@ -79,10 +81,10 @@ void loop() {
 
     /*FITERING*/
     //ENCODER A
-    if (encA > 890) {binA = 1;}
+    if (encA > 950) {binA = 1;}
     else {binA = 0;}
     //ENCODER B
-    if (encB > 850) {binB = 1;}
+    if (encB > 950) {binB = 1;}
     else {binB = 0;}
 
     /*ENCODER COUNTING*/
@@ -128,9 +130,9 @@ void loop() {
         Serial.print("RPM from builtin encoder: ");
         Serial.println((s/(228))*12);                         //5 Second Internal RPM Calculation
         Serial.print("RPM from optical quadrature encoder: ");
-        Serial.println(0.375*count);                          //5 Second External RPM Calculation
+        Serial.println((0.375*count)-(0.0058*count));                          //5 Second External RPM Calculation
         Serial.print("Error: ");
-        Serial.println((0.375*count) - (s/(228))*12);
+        Serial.println(((0.375*count)-(0.0058*count)) - (s/(228))*12);
         Serial.print("direction read by motor's sensor: ");
         if (dirm == 0) {Serial.print("CW");}
         else {Serial.print("CCW");}
@@ -139,6 +141,8 @@ void loop() {
         if (dir == 1) {Serial.print("CW");}
         else {Serial.print("CCW");}
         Serial.println();
+
+        // Serial.println(count);
 
         s = 0;            //Reset Internal Encoder Count
         count = 0;        //Reset External Encoder Count
