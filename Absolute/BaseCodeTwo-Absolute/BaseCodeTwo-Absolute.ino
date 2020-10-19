@@ -46,8 +46,8 @@ float ki = .02;                               //integral gain of PI
 
 
 //          MSB  A0  A1  A2  A3  A4  LSB
-//int fence[5] = {666,518,520,464,509};
-int fence[5] = {41,40,39,41,41};
+int fence[5] = {40,39,38,41,41};
+//int fence[5] = {41,40,39,41,41};
 //
 //int GrayToBinary(int num)
 //{
