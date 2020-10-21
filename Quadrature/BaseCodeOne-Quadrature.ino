@@ -132,13 +132,13 @@ void loop() {
         Serial.print("RPM from optical quadrature encoder: ");
         Serial.println((0.3692*count));                          //5 Second External RPM Calculation
         Serial.print("Error: ");
-        Serial.println((0.3692*count) - (s/(228))*12));
+        Serial.println((0.3692*count) - ((s/(228))*12));
         Serial.print("direction read by motor's sensor: ");
         if (dirm == 0) {Serial.print("CW");}
         else {Serial.print("CCW");}
         Serial.print("  ,   ");
         Serial.print("direction read by sensor:  ");
-        if (dir >= 0) {Serial.print("CW");}
+        if (dir <= 35) {Serial.print("CW");}
         else {Serial.print("CCW");}
         Serial.println();
 
@@ -157,8 +157,9 @@ void loop() {
     if((s1 == LOW) && (s2 == LOW) && (s2m == HIGH)) {directionm = directionm + 1;}
     if (directionm > 100) {dirm = 0;}
     if (directionm < 20) {dirm = 1;}
-    if (binB == binA) {dir++;}
-    else {dir--;}
+
+    if((binA == HIGH) && (binB == HIGH) && (binBPrev == LOW)) {dir++;}
+    if((binA == LOW) && (binB == LOW) && (binBPrev == HIGH)) {dir++;}
 
     /*ENCODER CHANNEL PREVIOUS READING*/
     s2m = s2;            //Previous Encoder Channel 2
