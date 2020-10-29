@@ -20,12 +20,13 @@ int binB = 0;      //External Encoder Binary Channel B
 int binAPrev = 0;  //Previous External Encoder Binary Channel A
 int binBPrev = 0;  //Previous External Encoder Binary Channel B
 int s2m = 0;       //Internal Encoder Channel 2 Memory
+int ThA = 955;     //Threshold for External Encoder Channel A
+int ThB = 925;     //Threshold for External Encoder Channel B
 
 //RPM VARIABLES//
 float rpmm;        //5 Second RPM Of Internal Encoder
 
 //DIRECTION VARIBLES//
-
 int directionm = 0;   //Internal Encoder Direction Count
 int dirm;             //Internal Encoder Direction
 int dir = 0;          //External Encoder Direction (0 = CCW, 1 = CW)
@@ -36,7 +37,7 @@ float kp = 0.4;    //Proportional Gain Of PI Controller
 float ki = 0.01;   //Integral Gain Of PI Controller
 float eri;         //Integral Of Error Of PI Controller
 int repc = 1;      //PI Controller Repetition Flag
-int RPM;           //Controller RPM
+int RPM;           //Controller RPM`
 
 //LOOP VARIABLES//
 int exitt = 0;       //Loop Exit Condition
@@ -51,8 +52,6 @@ void setup() {
   RPM = Serial.readString().toFloat();  //Read User Input
   if (RPM < 0) {analogWrite(3, 255);}   //Motor Rotation
   RPM = abs(RPM);
-
-  
 }
 
 
@@ -81,13 +80,14 @@ void loop() {
 
     /*FITERING*/
     //ENCODER A
-    if (encA > 940) {binA = 1;}
+    if (encA > 950) {binA = 1;}   //Channel A Threshold
     else {binA = 0;}
     //ENCODER B
-    if (encB > 940) {binB = 1;}
+    if (encB > 940) {binB = 1;}   //Channel B Threshold
     else {binB = 0;}
 
     /*ENCODER COUNTING*/
+    //Find edges and count up on edge
     if (binA != binAPrev) {count++;}
     if (binB != binBPrev) {count++;}
 
@@ -116,11 +116,9 @@ void loop() {
     if (b%100 == 0) {
       Serial.print("time in ms: ");
       Serial.print(b-t0);
-      Serial.print("  spontaneous speed from encoder (builtin, external):  (");
+      Serial.print("  spontaneous speed from encoder (builtin):  (");
       rpmm=(s_2/(2*114))*600;                //0.1 Second Internal RPM Calculation
       Serial.print(rpmm);
-      Serial.print(" , ");
-      Serial.print(18.75*count);             //0.1 Second External RPM Calculation
       Serial.println(")");
       s_2 = 0;                               //PI Controller Counter Reset
 
@@ -128,17 +126,18 @@ void loop() {
       if ((b-t0)%5000 == 0) {
         Serial.println();
         Serial.print("RPM from builtin encoder: ");
-        Serial.println((s/(228))*12);                         //5 Second Internal RPM Calculation
+        Serial.println((s/(228))*12);                              //5 Second Internal RPM Calculation
         Serial.print("RPM from optical quadrature encoder: ");
-        Serial.println((0.3692*count));                          //5 Second External RPM Calculation
+        //Serial.println((0.3692*count));                          //5 Second External RPM Calculation
+        Serial.println((0.375*count)-(0.00636*count-1.72)); 
         Serial.print("Error: ");
-        Serial.println((0.3692*count) - ((s/(228))*12));
+        Serial.println(((0.375*count)-(0.00636*count-1.72)) - ((s/(228))*12));  //Error
         Serial.print("direction read by motor's sensor: ");
         if (dirm == 0) {Serial.print("CW");}
         else {Serial.print("CCW");}
         Serial.print("  ,   ");
         Serial.print("direction read by sensor:  ");
-        if (dir <= 35) {Serial.print("CW");}
+        if (dir <= 40) {Serial.print("CW");}
         else {Serial.print("CCW");}
         Serial.println();
 
@@ -153,11 +152,13 @@ void loop() {
     }
 
     /*DIRECTION*/
+    //Built In Encoder
     if((s1 == HIGH) && (s2 == HIGH) && (s2m == LOW)) {directionm = directionm + 1;}
     if((s1 == LOW) && (s2 == LOW) && (s2m == HIGH)) {directionm = directionm + 1;}
     if (directionm > 100) {dirm = 0;}
     if (directionm < 20) {dirm = 1;}
 
+    //External Encoder
     if((binA == HIGH) && (binB == HIGH) && (binBPrev == LOW)) {dir++;}
     if((binA == LOW) && (binB == LOW) && (binBPrev == HIGH)) {dir++;}
 
