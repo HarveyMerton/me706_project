@@ -80,10 +80,10 @@ void loop() {
 
     /*FITERING*/
     //ENCODER A
-    if (encA > 950) {binA = 1;}   //Channel A Threshold
+    if (encA > ThA) {binA = 1;}   //Channel A Threshold
     else {binA = 0;}
     //ENCODER B
-    if (encB > 940) {binB = 1;}   //Channel B Threshold
+    if (encB > ThB) {binB = 1;}   //Channel B Threshold
     else {binB = 0;}
 
     /*ENCODER COUNTING*/
