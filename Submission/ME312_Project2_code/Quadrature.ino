@@ -128,7 +128,6 @@ void loop() {
         Serial.print("RPM from builtin encoder: ");
         Serial.println((s/(228))*12);                              //5 Second Internal RPM Calculation
         Serial.print("RPM from optical quadrature encoder: ");
-        //Serial.println((0.3692*count));                          //5 Second External RPM Calculation
         Serial.println((0.375*count)-(0.00636*count-1.72)); 
         Serial.print("Error: ");
         Serial.println(((0.375*count)-(0.00636*count-1.72)) - ((s/(228))*12));  //Error
@@ -140,8 +139,6 @@ void loop() {
         if (dir <= 40) {Serial.print("CW");}
         else {Serial.print("CCW");}
         Serial.println();
-
-        // Serial.println(count);
 
         s = 0;            //Reset Internal Encoder Count
         count = 0;        //Reset External Encoder Count
