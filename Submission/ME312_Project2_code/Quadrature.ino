@@ -128,14 +128,14 @@ void loop() {
         Serial.print("RPM from builtin encoder: ");
         Serial.println((s/(228))*12);                              //5 Second Internal RPM Calculation
         Serial.print("RPM from optical quadrature encoder: ");
-        Serial.println((0.375*count)-(0.00636*count-1.72)); 
+        Serial.println((0.375*count)-(0.00636*count-1.72));		   //External Encoder RPM Calculation 
         Serial.print("Error: ");
         Serial.println(((0.375*count)-(0.00636*count-1.72)) - ((s/(228))*12));  //Error
         Serial.print("direction read by motor's sensor: ");
-        if (dirm == 0) {Serial.print("CW");}
+        if (dirm == 0) {Serial.print("CW");}			//Internal Encoder Direction
         else {Serial.print("CCW");}
         Serial.print("  ,   ");
-        Serial.print("direction read by sensor:  ");
+        Serial.print("direction read by sensor:  ");	//External Encoder Direction
         if (dir <= 40) {Serial.print("CW");}
         else {Serial.print("CCW");}
         Serial.println();
