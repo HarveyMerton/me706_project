@@ -22,7 +22,7 @@
 #include <Servo.h>  //Need for Servo pulse output
 
 //#define NO_READ_GYRO  //Uncomment of GYRO is not attached.
-//#define NO_HC-SR04 //Uncomment of HC-SR04 ultrasonic ranging sensor is not attached.
+#define NO_HC-SR04 //Uncomment of HC-SR04 ultrasonic ranging sensor is not attached.
 //#define NO_BATTERY_V_OK //Uncomment of BATTERY_V_OK if you do not care about battery damage.
 
 //State machine states
@@ -110,44 +110,129 @@ STATE initialising() {
   return RUNNING;
 }
 
+int error = 0;
+int f_error = 0;
+
+
+int target = 300;
+int forward_target = 200;
+float k = 8;
+
+float ki = 0.005;
+
+int error_total = 0;
+
 STATE running() {
 
   static unsigned long previous_millis;
 
-  read_serial_command();
+  //MY CODE
+
+  error = target - analogRead(A4);
+  f_error = forward_target - analogRead(A5);
+
+  error_total = error_total + error;
+
+  int speed_val_left = 1750 - error * k - ki*error_total;
+  int speed_val_right = 1250 - error * k - ki*error_total;
+
+  if (error > 100) {
+
+      int speed_val_left = 1500 - error * k - ki*error_total;
+      int speed_val_right = 1500 - error * k - ki*error_total;
+  }
+  
+  if (f_error < 0) {
+
+      left_font_motor.writeMicroseconds(1500 + 250);
+      left_rear_motor.writeMicroseconds(1500 + 250);
+      right_rear_motor.writeMicroseconds(1500 + 250);
+      right_font_motor.writeMicroseconds(1500 + 250);
+            
+  } else {
+
+    
+
+
+  if (speed_val_left > 2000) {
+    speed_val_left = 2000;
+  }
+
+  if (speed_val_left < 1250) {
+    speed_val_left = 1250;
+  }
+  
+  if (speed_val_right > 1750) {
+    speed_val_right = 1750;
+  }
+
+  if (speed_val_right < 1000) {
+    speed_val_right = 1000;
+  }
+
+  
+  left_font_motor.writeMicroseconds(speed_val_left);
+  left_rear_motor.writeMicroseconds(speed_val_left);
+
+  
+  right_rear_motor.writeMicroseconds(speed_val_right);
+  right_font_motor.writeMicroseconds(speed_val_right);
+
+  }
+
+//  Analog_Range_A4();
+
+
+    SerialCom->print("Error: ");
+    SerialCom->print(error);
+    SerialCom->print(" | Right: ");
+    SerialCom->print(speed_val_right);
+    SerialCom->print(" | Left: ");
+    SerialCom->print(speed_val_left);
+
+    SerialCom->print(" | ");
+
+//  speed_change_smooth()
+
+
+
+
+  
+
+  //read_serial_command();
   fast_flash_double_LED_builtin();
 
-  if (millis() - previous_millis > 500) {  //Arduino style 500ms timed execution statement
-    previous_millis = millis();
+//  if (millis() - previous_millis > 500) {  //Arduino style 500ms timed execution statement
+//    previous_millis = millis();
 
-    SerialCom->println("RUNNING---------");
-    speed_change_smooth();
-    Analog_Range_A4();
+//    SerialCom->println("RUNNING---------");
+//    speed_change_smooth();
+//    Analog_Range_A4();
 
-#ifndef NO_READ_GYRO
-    GYRO_reading();
-#endif
-
-#ifndef NO_HC-SR04
-    HC_SR04_range();
-#endif
-
+//#ifndef NO_READ_GYRO
+//    GYRO_reading();
+//#endif
+//
+//#ifndef NO_HC-SR04
+//    HC_SR04_range();
+//#endif
+//
 #ifndef NO_BATTERY_V_OK
     if (!is_battery_voltage_OK()) return STOPPED;
 #endif
 
 
-    turret_motor.write(pos);
-
-    if (pos == 0)
-    {
-      pos = 45;
-    }
-    else
-    {
-      pos = 0;
-    }
-  }
+//    turret_motor.write(pos);
+//
+//    if (pos == 0)
+//    {
+//      pos = 45;
+//    }
+//    else
+//    {
+//      pos = 0;
+//    }
+//  }
 
   return RUNNING;
 }
@@ -217,7 +302,6 @@ void speed_change_smooth()
   speed_val += speed_change;
   if (speed_val > 1000)
     speed_val = 1000;
-  speed_change = 0;
 }
 
 #ifndef NO_BATTERY_V_OK
