@@ -16,13 +16,17 @@
 
 #include <math.h>
 #define TEST_NO 5
+#define IRMed1 A6
+#define IRMed2 A5
+#define IRLng1 A4
+#define IRLng2 A7
 
 double TestingRanges[TEST_NO];
 double SensorReadings[TEST_NO];
 
 void Calibration();
-void Calibration_IR_Short();
-void Calibration_IR_Long();
+void Calibration_IR_Long(int pin);
+void Calibration_IR_Short(int pin);
 void Calibration_GYRO();
 double HC_SR04_range();
 void generateRanges(int minRange, int maxRange);
@@ -44,13 +48,38 @@ void loop() {
 
 void Calibration(){
     Serial.print("Enter Sensor ID: ");
-    int ID =  int(Serial.read());
-    ID = 6;
+    //int ID =  int(Serial.read());
+    int ID = 6;
+    switch(ID){
+      case 1:
+        Calibration_IR_Short(IRMed1);
+        break;
+      case 2:
+        Calibration_IR_Short(IRMed2);
+        break;
+      case 3:
+        Calibration_IR_Long(IRLng1);
+        break;
+      case 4:
+        Calibration_IR_Long(IRLng2);
+        break;
+      case 5:
+        Calibration_GYRO();
+        break;
+      case 6:
+        Calibration_US();
+        break;
+      default:
+        break;
+    }
+    
+    /*
     if (ID == 1 || ID == 2){Calibration_IR_Short();}
     if (ID == 3 || ID == 4){Calibration_IR_Long();}
     else if (ID == 5){Calibration_GYRO();}
     else if (ID == 6){Calibration_US();}
     else {Serial.println("ERROR: ID Not Valid.");}
+    */
 }
 
 

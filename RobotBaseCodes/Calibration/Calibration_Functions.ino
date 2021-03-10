@@ -1,11 +1,10 @@
-void Calibration_IR_Long(){
+void Calibration_IR_Long(int pin){
   generateRanges(100, 800);
   double reading = 9999;
   for (int i = 0; i < TEST_NO+1; i++){
     Serial.print("Place the Robot "); Serial.print(TestingRanges[i]); Serial.println("mm from a Wall.");
     Serial.read();
-    //READ VALUE reading = Serial.analogRead(PIN);
-    reading = 5;
+    reading = analogRead(pin);
     Serial.print("Robot Sensor Reading: "); Serial.println(reading); Serial.println();
     SensorReadings[i] = reading;
   }
@@ -13,14 +12,13 @@ void Calibration_IR_Long(){
 }
 
 
-void Calibration_IR_Short(){
+void Calibration_IR_Short(int pin){
   generateRanges(40, 300);
   double reading = 9999;
   for (int i = 0; i < TEST_NO+1; i++){
     Serial.print("Place the Robot "); Serial.print(TestingRanges[i]); Serial.println("mm from a Wall.");
     Serial.read();
-    //READ VALUE reading = Serial.analogRead(PIN);
-    reading = 5;
+    reading = analogRead(pin);
     Serial.print("Robot Sensor Reading: "); Serial.println(reading); Serial.println();
     SensorReadings[i] = reading;
   }
