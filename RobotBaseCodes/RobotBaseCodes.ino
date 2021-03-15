@@ -41,11 +41,11 @@ const byte right_rear = 50;
 const byte right_front = 51;
 
 
-//Default ultrasonic ranging sensor pins, these pins are defined my the Shield
+//Default ultrasonic ranging sensor pins, these pins are defined by the Shield
 const int TRIG_PIN = 48;
 const int ECHO_PIN = 49;
 
-// Anything over 400 cm (23200 us pulse) is "out of range". Hit:If you decrease to this the ranging sensor but the timeout is short, you may not need to read up to 4meters.
+// Anything over 400 cm (23200 us pulse) is "out of range". Hint:If you decrease to this the ranging sensor but the timeout is short, you may not need to read up to 4meters.
 const unsigned int MAX_DIST = 23200;
 
 Servo left_font_motor;  // create servo object to control Vex Motor Controller 29
@@ -78,7 +78,7 @@ void setup(void)
   delay(1000);
   SerialCom->println("Setup....");
 
-  delay(1000); //settling time but no really needed
+  delay(1000); //settling time but not really needed
 
 }
 
@@ -93,7 +93,7 @@ void loop(void) //main loop
     case RUNNING: //Lipo Battery Volage OK
       machine_state =  running();
       break;
-    case STOPPED: //Stop of Lipo Battery voltage is too low, to protect Battery
+    case STOPPED: //Stop if Lipo Battery voltage is too low, to protect Battery
       machine_state =  stopped();
       break;
   };
@@ -234,7 +234,7 @@ boolean is_battery_voltage_OK()
   raw_lipo = analogRead(A0);
   Lipo_level_cal = (raw_lipo - 717);
   Lipo_level_cal = Lipo_level_cal * 100;
-  Lipo_level_cal = Lipo_level_cal / 143;
+  Lipo_level_cal = Lipo_level_cal / 143; //Max difference between Lowest and highest level
 
   if (Lipo_level_cal > 0 && Lipo_level_cal < 160) {
     previous_millis = millis();
