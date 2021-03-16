@@ -1,4 +1,5 @@
 void Calibration_IR_Long(int pin){
+  /*
   generateRanges(100, 800);
   double reading = 9999;
   for (int i = 0; i < TEST_NO+1; i++){
@@ -9,10 +10,12 @@ void Calibration_IR_Long(int pin){
     SensorReadings[i] = reading;
   }
   printReadings();
+  */
 }
 
 
 void Calibration_IR_Short(int pin){
+  /*
   generateRanges(40, 300);
   double reading = 9999;
   for (int i = 0; i < TEST_NO+1; i++){
@@ -23,10 +26,12 @@ void Calibration_IR_Short(int pin){
     SensorReadings[i] = reading;
   }
   printReadings();
+  */
 }
 
 
 void Calibration_US(){
+  /*
   generateRanges(20, 1800);
   double reading = 9999;
   HC_SR04_range();
@@ -38,6 +43,10 @@ void Calibration_US(){
     SensorReadings[i] = reading;
   }
   printReadings();
+  */
+  double val = HC_SR04_range();
+  Serial.println(val);
+  while(Serial.available() == 1) { }
 }
 
 
