@@ -1,54 +1,31 @@
-void Calibration_IR_Long(int pin){
-  /*
-  generateRanges(100, 800);
-  double reading = 9999;
-  for (int i = 0; i < TEST_NO+1; i++){
-    Serial.print("Place the Robot "); Serial.print(TestingRanges[i]); Serial.println("mm from a Wall.");
+void Calibration_IR(int pin, int ranges[], int arraySize){
+  for (int i = 0; i < TEST_NO; i++){
+    Serial.flush();
+    Serial.print("Place Robot "); Serial.print(ranges[i]); Serial.println("mm Away from a Wall");
+    while(Serial.available() == 1){}
     Serial.read();
-    reading = analogRead(pin);
-    Serial.print("Robot Sensor Reading: "); Serial.println(reading); Serial.println();
-    SensorReadings[i] = reading;
+    Serial.print("Actual Reading: "); Serial.println(analogRead(pin));
+    Serial.println(i);
   }
-  printReadings();
-  */
 }
 
 
-void Calibration_IR_Short(int pin){
-  /*
-  generateRanges(40, 300);
-  double reading = 9999;
-  for (int i = 0; i < TEST_NO+1; i++){
-    Serial.print("Place the Robot "); Serial.print(TestingRanges[i]); Serial.println("mm from a Wall.");
+void Calibration_US(int ranges[]){
+  float val = 0.0;
+  for (int i = 0; i < TEST_NO; i++){
+    Serial.flush();
+    Serial.print("Place Robot "); Serial.print(ranges[i]); Serial.println("mm Away from a Wall");
+    while(Serial.available() == 1){}
     Serial.read();
-    reading = analogRead(pin);
-    Serial.print("Robot Sensor Reading: "); Serial.println(reading); Serial.println();
-    SensorReadings[i] = reading;
+    val = HC_SR04_range();
+    Serial.print("Actual Reading: "); Serial.println(val);
+    Serial.println();
   }
-  printReadings();
-  */
-}
-
-
-void Calibration_US(){
-  /*
-  generateRanges(20, 1800);
-  double reading = 9999;
-  HC_SR04_range();
-  for (int i = 0; i < TEST_NO+1; i++){
-    Serial.print("Place the Robot "); Serial.print(TestingRanges[i]); Serial.println("mm from a Wall.");
-    Serial.read();
-    reading = HC_SR04_range();
-    Serial.print("Robot Sensor Reading: "); Serial.println(reading); Serial.println();
-    SensorReadings[i] = reading;
-  }
-  printReadings();
-  */
-  double val = HC_SR04_range();
+  
   Serial.println(val);
   while(Serial.available() == 1) { }
 }
 
 
-void Calibration_GYRO(){
+void Calibration_GYRO(int ranges[]){
 }
