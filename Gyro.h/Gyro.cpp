@@ -22,28 +22,28 @@ Gyro::Gyro(int pin){
   
 }
 
-//Function to find OC1A in timerSetup to give the correct sampling period
-float Gyro::findOC1A(){ 
+//Function to find OCnA in timerSetup to give the correct sampling period
+float Gyro::findOCnA(){ 
   return ((16000000/(1024.0*GYRO_Fs))-1);
 }
 
 //Function to set up t/c 1 for use by the gyro
 void Gyro::timerSetup(){ 
   //Reset registers 
-  TCCR1A = 0; 
-  TCCR1B = 0;  
+  TCCR3A = 0; 
+  TCCR3B = 0;  
 
   //SET UP TC1 for gyro integration
   //PRR0 &= ~(1<<PRTIM1); //Turn off power reduction for TC1
   
   //Set reset value 
-  OCR1A = findOC1A(); //1560 for 10 Hz, 156 for 100 Hz
+  OCR3A = findOCnA(); //1560 for 10 Hz, 156 for 100 Hz
 
   //Set timer/counter1 to CTC mode
-  TCCR1B |= 1<<WGM12;
+  TCCR3B |= 1<<WGM32;
 
   //Set prescalar to 1024 and start clock
-  TCCR1B |= (1<<CS12) | (1<<CS10);
+  TCCR3B |= (1<<CS32) | (1<<CS30);
   
 }
 
@@ -89,13 +89,13 @@ float Gyro::setAng(float newAng)
 
 //Toggle gyro integration on
 void Gyro::countOn(){ 
-  TCNT1 = 0;
-  TIMSK1 |= 1<<OCIE1A;
+  TCNT3 = 0;
+  TIMSK3 |= 1<<OCIE3A;
 }
 
 //Toggle gyro integration off
 void Gyro::countOff(){ 
-  TIMSK1 &= ~(1<<OCIE1A);
+  TIMSK3 &= ~(1<<OCIE3A);
 }
 
 //Reset gyro value 

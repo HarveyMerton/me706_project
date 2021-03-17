@@ -36,7 +36,7 @@ class Gyro
 
     void timerSetup();
   private: 
-    float findOC1A();
+    float findOCnA();
 
     int PIN_DATA;
     float V_NULL;

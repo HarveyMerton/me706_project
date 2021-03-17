@@ -20,10 +20,18 @@
   Author: Logan Stuart
 */
 #include <Servo.h>  //Need for Servo pulse output
+#include <Gyro.h>
 
 //#define NO_READ_GYRO  //Uncomment of GYRO is not attached.
 #define NO_HC-SR04 //Uncomment of HC-SR04 ultrasonic ranging sensor is not attached.
 //#define NO_BATTERY_V_OK //Uncomment of BATTERY_V_OK if you do not care about battery damage.
+
+//Define pins
+#define PIN_GYRO_DAT 3 //Analogue 3 
+
+//Define gyro object
+Gyro gyro = Gyro(PIN_GYRO_DAT);
+
 
 //State machine states
 enum STATE {
@@ -64,6 +72,7 @@ HardwareSerial *SerialCom;
 int pos = 0;
 void setup(void)
 {
+  cli();
   turret_motor.attach(11);
   pinMode(LED_BUILTIN, OUTPUT);
 
@@ -78,8 +87,13 @@ void setup(void)
   delay(1000);
   SerialCom->println("Setup....");
 
-  delay(1000); //settling time but no really needed
+  //Setup gyro
+  gyro.timerSetup();
+  gyro.calibrate(); 
+  gyro.countOn();
 
+  delay(1000); //settling time but no really needed
+  sei();
 }
 
 void loop(void) //main loop
@@ -114,8 +128,8 @@ int error = 0;
 int f_error = 0;
 
 
-int target = 300;
-int forward_target = 150;
+int target = 430; //Decrease = further out, increase = closer //350 380
+int forward_target = 330; //Decrease = further out, increase = closer //250 280
 float k = 7;
 
 float ki = 0.005;
@@ -141,19 +155,28 @@ STATE running() {
       int speed_val_left = 1500 - error * k - ki*error_total;
       int speed_val_right = 1500 - error * k - ki*error_total;
   }
+
   
   if (f_error < 0) {
-
-      left_font_motor.writeMicroseconds(1500 + 250);
-      left_rear_motor.writeMicroseconds(1500 + 250);
-      right_rear_motor.writeMicroseconds(1500 + 250);
-      right_font_motor.writeMicroseconds(1500 + 250);
-      delay(800);
+    //gyro.reset();
+    //gyro.countOn();
+    gyro.reset();
+      while(gyro.getAng() < 85.00){ //ASDF
+          Serial.println(gyro.getAng());
+          left_font_motor.writeMicroseconds(1500 + 250);
+          left_rear_motor.writeMicroseconds(1500 + 250);
+          right_rear_motor.writeMicroseconds(1500 + 250);
+          right_font_motor.writeMicroseconds(1500 + 250);
+          Serial.println(gyro.getAng());
+      }
+      
+      //Serial.println("Exit");
+      //gyro.countOff();
+      
+      //delay(800);
+      
             
-  } else {
-
-    
-
+  } else { //Move forward and keep straight
 
   if (speed_val_left > 2000) {
     speed_val_left = 2000;
@@ -564,4 +587,15 @@ void strafe_right ()
   left_rear_motor.writeMicroseconds(1500 - speed_val);
   right_rear_motor.writeMicroseconds(1500 - speed_val);
   right_font_motor.writeMicroseconds(1500 + speed_val);
+}
+
+
+
+//Interrupt for tc1 - get gyro value for integration
+ISR(TIMER3_COMPA_vect){ 
+  //Serial.println(1.0/GYRO_Fs);
+  //Serial.println(gyro.getAng() + gyro.readAngRate()*(1.0/GYRO_Fs));
+  gyro.setAng(gyro.getAng() + gyro.readAngRate()*(1.0/GYRO_Fs));  
+  //Serial.println(gyro.getAng()); 
+  //j++;
 }

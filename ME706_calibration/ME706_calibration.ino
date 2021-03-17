@@ -30,15 +30,19 @@ void setup() {
 int i = 0;
 int j = 0;
 void loop() {
+  
+  Serial.println(gyro.getAng());
+  /*
   //For testing the frequency of interrupts
   if(i == 0){
     //testFreq();
     //Serial.println(findOC1A());
   }
+  */
 
   //For testing the ability of the gyro to measure
   //testMeasure();
-  asm("nop");
+  //asm("nop");
 }
 
 //For testing the frequency of the interrupts
@@ -75,7 +79,7 @@ float findOC1A(){
 }
 
 //Interrupt for tc1 - get gyro value for integration
-ISR(TIMER1_COMPA_vect){ 
+ISR(TIMER3_COMPA_vect){ 
   //Serial.println(1.0/GYRO_Fs);
   //Serial.println(gyro.getAng() + gyro.readAngRate()*(1.0/GYRO_Fs));
   gyro.setAng(gyro.getAng() + gyro.readAngRate()*(1.0/GYRO_Fs));  
