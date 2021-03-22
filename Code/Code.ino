@@ -19,7 +19,7 @@
   Modified: 15/02/2018
   Author: Logan Stuart
 */
-#include "src/ServoTimer2/ServoTimer2.h"  //Need for Servo pulse output
+#include "src/Servo_m/src/Servo_m.h"  //Need for Servo pulse output
 #include "src/Gyro/Gyro.h"
 
 //#define NO_READ_GYRO  //Uncomment of GYRO is not attached.
@@ -56,11 +56,11 @@ const int ECHO_PIN = 49;
 // Anything over 400 cm (23200 us pulse) is "out of range". Hit:If you decrease to this the ranging sensor but the timeout is short, you may not need to read up to 4meters.
 const unsigned int MAX_DIST = 23200;
 
-ServoTimer2 left_font_motor;  // create servo object to control Vex Motor Controller 29
-ServoTimer2 left_rear_motor;  // create servo object to control Vex Motor Controller 29
-ServoTimer2 right_rear_motor;  // create servo object to control Vex Motor Controller 29
-ServoTimer2 right_font_motor;  // create servo object to control Vex Motor Controller 29
-ServoTimer2 turret_motor;
+Servo_m left_font_motor;  // create servo object to control Vex Motor Controller 29
+Servo_m left_rear_motor;  // create servo object to control Vex Motor Controller 29
+Servo_m right_rear_motor;  // create servo object to control Vex Motor Controller 29
+Servo_m right_font_motor;  // create servo object to control Vex Motor Controller 29
+Servo_m turret_motor;
 
 
 int speed_val = 100;
@@ -163,10 +163,10 @@ STATE running() {
     gyro.reset();
       while(gyro.getAng() < 85.00){ //ASDF
           Serial.println(gyro.getAng());
-          left_font_motor.write(1500 + 250);
-          left_rear_motor.write(1500 + 250);
-          right_rear_motor.write(1500 + 250);
-          right_font_motor.write(1500 + 250);
+          left_font_motor.writeMicroseconds(1500 + 250);
+          left_rear_motor.writeMicroseconds(1500 + 250);
+          right_rear_motor.writeMicroseconds(1500 + 250);
+          right_font_motor.writeMicroseconds(1500 + 250);
           Serial.println(gyro.getAng());
       }
       
@@ -195,12 +195,12 @@ STATE running() {
   }
 
   
-  left_font_motor.write(speed_val_left);
-  left_rear_motor.write(speed_val_left);
+  left_font_motor.writeMicroseconds(speed_val_left);
+  left_rear_motor.writeMicroseconds(speed_val_left);
 
   
-  right_rear_motor.write(speed_val_right);
-  right_font_motor.write(speed_val_right);
+  right_rear_motor.writeMicroseconds(speed_val_right);
+  right_font_motor.writeMicroseconds(speed_val_right);
 
   }
 
@@ -246,7 +246,7 @@ STATE running() {
 #endif
 
 
-//    turret_motor.write(pos);
+//    turret_motor.writeMicroseconds(pos);
 //
 //    if (pos == 0)
 //    {
@@ -535,58 +535,58 @@ void enable_motors()
 }
 void stop() //Stop
 {
-  left_font_motor.write(1500);
-  left_rear_motor.write(1500);
-  right_rear_motor.write(1500);
-  right_font_motor.write(1500);
+  left_font_motor.writeMicroseconds(1500);
+  left_rear_motor.writeMicroseconds(1500);
+  right_rear_motor.writeMicroseconds(1500);
+  right_font_motor.writeMicroseconds(1500);
 }
 
 void forward()
 {
-  left_font_motor.write(1500 + speed_val);
-  left_rear_motor.write(1500 + speed_val);
-  right_rear_motor.write(1500 - speed_val);
-  right_font_motor.write(1500 - speed_val);
+  left_font_motor.writeMicroseconds(1500 + speed_val);
+  left_rear_motor.writeMicroseconds(1500 + speed_val);
+  right_rear_motor.writeMicroseconds(1500 - speed_val);
+  right_font_motor.writeMicroseconds(1500 - speed_val);
 }
 
 void reverse ()
 {
-  left_font_motor.write(1500 - speed_val);
-  left_rear_motor.write(1500 - speed_val);
-  right_rear_motor.write(1500 + speed_val);
-  right_font_motor.write(1500 + speed_val);
+  left_font_motor.writeMicroseconds(1500 - speed_val);
+  left_rear_motor.writeMicroseconds(1500 - speed_val);
+  right_rear_motor.writeMicroseconds(1500 + speed_val);
+  right_font_motor.writeMicroseconds(1500 + speed_val);
 }
 
 void ccw ()
 {
-  left_font_motor.write(1500 - speed_val);
-  left_rear_motor.write(1500 - speed_val);
-  right_rear_motor.write(1500 - speed_val);
-  right_font_motor.write(1500 - speed_val);
+  left_font_motor.writeMicroseconds(1500 - speed_val);
+  left_rear_motor.writeMicroseconds(1500 - speed_val);
+  right_rear_motor.writeMicroseconds(1500 - speed_val);
+  right_font_motor.writeMicroseconds(1500 - speed_val);
 }
 
 void cw ()
 {
-  left_font_motor.write(1500 + speed_val);
-  left_rear_motor.write(1500 + speed_val);
-  right_rear_motor.write(1500 + speed_val);
-  right_font_motor.write(1500 + speed_val);
+  left_font_motor.writeMicroseconds(1500 + speed_val);
+  left_rear_motor.writeMicroseconds(1500 + speed_val);
+  right_rear_motor.writeMicroseconds(1500 + speed_val);
+  right_font_motor.writeMicroseconds(1500 + speed_val);
 }
 
 void strafe_left ()
 {
-  left_font_motor.write(1500 - speed_val);
-  left_rear_motor.write(1500 + speed_val);
-  right_rear_motor.write(1500 + speed_val);
-  right_font_motor.write(1500 - speed_val);
+  left_font_motor.writeMicroseconds(1500 - speed_val);
+  left_rear_motor.writeMicroseconds(1500 + speed_val);
+  right_rear_motor.writeMicroseconds(1500 + speed_val);
+  right_font_motor.writeMicroseconds(1500 - speed_val);
 }
 
 void strafe_right ()
 {
-  left_font_motor.write(1500 + speed_val);
-  left_rear_motor.write(1500 - speed_val);
-  right_rear_motor.write(1500 - speed_val);
-  right_font_motor.write(1500 + speed_val);
+  left_font_motor.writeMicroseconds(1500 + speed_val);
+  left_rear_motor.writeMicroseconds(1500 - speed_val);
+  right_rear_motor.writeMicroseconds(1500 - speed_val);
+  right_font_motor.writeMicroseconds(1500 + speed_val);
 }
 
 
