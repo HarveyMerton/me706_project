@@ -27,17 +27,21 @@
 #define ECHO_PIN 49
 #define MAX_DIST 23200
 
-int Ranges_IR_Long [TEST_NO] = {1,2,3,4,5};
-int Ranges_IR_Med [TEST_NO] = {1,2,3,4,5};
-int Ranges_Gyro [TEST_NO] = {1,2,3,4,5};
-int Ranges_Ultrasonic [TEST_NO] = {1,2,3,4,5};
+int Ranges_IR_Long [TEST_NO] = {110,175,240,305,370};
+int Ranges_IR_Med [TEST_NO] = {210,385,560,735,910};
+int Ranges_Gyro [TEST_NO] = {0,90,170,270,360};
+int Ranges_Ultrasonic [TEST_NO] = {95,550,1000,1450,1890};
 
 int ID = -1;
+
+int ranges [TEST_NO];
+float results [TEST_NO];
 
 void Calibration();
 void Calibration_IR(int pin, int ranges[], int arraySize);
 void Calibration_US(int ranges[]);
-void Calibration_GYRO(int ranges[]);
+void Calibration_GYRO(int ranges[], int arraySize);
+void printResults(int ranges[], int arraySize);
 double HC_SR04_range();
 
 
@@ -52,45 +56,61 @@ void setup() {
   digitalWrite(TRIG_PIN, LOW);
   
   Serial.begin(9600);
+}
+
+void loop() {
   Calibration();
 }
 
-void loop(){}
-
 void Calibration(){
-    goto Error;
-    Error:
-    Serial.print("Enter Sensor ID: ");
-    while (ID == -1){ID = Serial.read();}
-    switch(ID){
-      case 49: //1
-        Serial.println("1");
-        Calibration_IR(IR_LF, Ranges_IR_Med, sizeof(Ranges_IR_Med));
-        break;
-      case 50: //2
-        Serial.println("2");
-        Calibration_IR(IR_LF, Ranges_IR_Med, sizeof(Ranges_IR_Med));
-        break;
-      case 51: //3
-        Serial.println("3");
-        Calibration_IR(IR_LF, Ranges_IR_Long, sizeof(Ranges_IR_Long));
-        break;
-      case 52: //4
-        Serial.println("4");
-        Calibration_IR(IR_LF, Ranges_IR_Long, sizeof(Ranges_IR_Long));
-        break;
-      case 53: //5
-        Serial.println("5");
-        Calibration_GYRO(Ranges_Gyro);
-        break;
-      case 54: //6
-        Serial.println("6");
-        Calibration_US(Ranges_Ultrasonic);
-        break;
-      default:
-        Serial.println("ERROR: ID NOT VALID!");
-        ID = -1;
-        goto Error;
-        break;
-    }
+  goto Error;
+  Error:
+  Serial.print("Enter Sensor ID: ");
+  while (ID == -1){ID = Serial.read();}
+  switch(ID){
+    case 49: //1
+      Serial.println("1");
+      Calibration_IR(IR_LF, Ranges_IR_Med, TEST_NO);
+      printResults(Ranges_IR_Med, TEST_NO);
+      break;
+    case 50: //2
+      Serial.println("2");
+      Calibration_IR(IR_LF, Ranges_IR_Med, TEST_NO);
+      printResults(Ranges_IR_Med, TEST_NO);
+      break;
+    case 51: //3
+      Serial.println("3");
+      Calibration_IR(IR_LF, Ranges_IR_Long, TEST_NO);
+      printResults(Ranges_IR_Long, TEST_NO);
+      break;
+    case 52: //4
+      Serial.println("4");
+      Calibration_IR(IR_LF, Ranges_IR_Long, TEST_NO);
+      printResults(Ranges_IR_Long, TEST_NO);
+      break;
+    case 53: //5
+      Serial.println("5");
+      Calibration_GYRO(Ranges_Gyro, TEST_NO);
+      printResults(Ranges_Gyro, TEST_NO);
+      break;
+    case 54: //6
+      Serial.println("6");
+      Calibration_US(Ranges_Ultrasonic, TEST_NO);
+      printResults(Ranges_Ultrasonic, TEST_NO);
+      break;
+    default:
+      Serial.println("ERROR: ID NOT VALID!");
+      ID = -1;
+      goto Error;
+      break;
+  }
+  Serial.println();
+}
+
+void printResults(int ranges[], int arraySize){
+  Serial.println("Range\tReading");
+  for (int i = 0; i < arraySize; i++){
+    Serial.print(ranges[i]); Serial.print("mm\t"); Serial.println(results[i]);
+  }
+  Serial.println();
 }
