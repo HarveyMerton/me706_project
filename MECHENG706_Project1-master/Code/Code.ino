@@ -19,7 +19,7 @@
   Modified: 15/02/2018
   Author: Logan Stuart
 */
-#include "src/ServoTimer2/ServoTimer2.h"  //Need for Servo pulse output
+#include "src/Servo_m/src/Servo_m.h"  //Need for Servo pulse output
 #include "src/Gyro/Gyro.h"
 
 //#define NO_READ_GYRO  //Uncomment of GYRO is not attached.
@@ -36,7 +36,6 @@
 
 //Define gyro object
 Gyro gyro = Gyro(PIN_GYRO_DAT);
-
 
 //State machine states
 enum STATE {
@@ -60,11 +59,11 @@ const int ECHO_PIN = 49;
 // Anything over 400 cm (23200 us pulse) is "out of range". Hit:If you decrease to this the ranging sensor but the timeout is short, you may not need to read up to 4meters.
 const unsigned int MAX_DIST = 23200;
 
-ServoTimer2 left_font_motor;  // create servo object to control Vex Motor Controller 29
-ServoTimer2 left_rear_motor;  // create servo object to control Vex Motor Controller 29
-ServoTimer2 right_rear_motor;  // create servo object to control Vex Motor Controller 29
-ServoTimer2 right_font_motor;  // create servo object to control Vex Motor Controller 29
-ServoTimer2 turret_motor;
+Servo_m left_font_motor;  // create servo object to control Vex Motor Controller 29
+Servo_m left_rear_motor;  // create servo object to control Vex Motor Controller 29
+Servo_m right_rear_motor;  // create servo object to control Vex Motor Controller 29
+Servo_m right_font_motor;  // create servo object to control Vex Motor Controller 29
+Servo_m turret_motor;
 
 
 int speed_val = 100;
@@ -133,6 +132,7 @@ STATE initialising() {
   SerialCom->println("RUNNING STATE...");
   return RUNNING;
 }
+
 int turnCounter = 0;
 int speed_val_left = 0;
 int speed_val_right = 0;
@@ -140,15 +140,19 @@ int speed_val_right = 0;
 float l_error = 0;
 float f_error = 0;
 float error_total = 0;
+float IR_error = 0;
 
 float turn_error = 0;
 float turn_error_total = 0;
 
-float l_target = 430; //Decrease = further out, increase = closer //350 380
-float f_target = 330; //Decrease = further out, increase = closer //250 280
+float l_target = 150;
+float f_target = 150;
+//float l_target = 430; //Decrease = further out, increase = closer //350 380
+//float f_target = 330; //Decrease = further out, increase = closer //250 280
 
 // Proportional constants for moving straight and turning 90 degrees respectively
 float kp_f = 7;
+float kp_straight = 0.005;
 float ki_f = 0.005;
 
 float kp_t = 7;
@@ -162,17 +166,18 @@ STATE running() {
 
   l_error = l_target - IR_left_calc(analogRead(IR_LF));
   f_error = f_target - IR_front_calc(analogRead(IR_FL));
+  IR_error = IR_left_calc(analogRead(IR_LR)) - IR_left_calc(analogRead(IR_LF));
 
   if ((turnCounter == 3) && (l_error < 0) && (f_error < 0)) {stop();}
 
   error_total = error_total + l_error;
 
-  speed_val_left = 1750 - kp_f*l_error - ki_f*error_total;
-  speed_val_right = 1250 - kp_f*l_error - ki_f*error_total;
+  speed_val_left = 1750 - kp_f*l_error - ki_f*error_total + kp_straight*IR_error;
+  speed_val_right = 1250 - kp_f*l_error - ki_f*error_total + kp_straight*IR_error;
 
   if (l_error > 100) {
-      speed_val_left = 1500 - kp_f*l_error - ki_f*error_total;
-      speed_val_right = 1500 - kp_f*l_error - ki_f*error_total;
+      speed_val_left = 1500 - kp_f*l_error - ki_f*error_total + kp_straight*IR_error;
+      speed_val_right = 1500 - kp_f*l_error - ki_f*error_total + kp_straight*IR_error;
   }
 
   // If the front of the robot is close to the wall
@@ -190,10 +195,10 @@ STATE running() {
       speed_val_right = constrain(1500 + kp_t*turn_error + ki_t*turn_error_total, 1250, 2000);
 
       // Writing power to motors
-      left_font_motor.write(speed_val_left);
-      left_rear_motor.write(speed_val_left);
-      right_rear_motor.write(speed_val_right);
-      right_font_motor.write(speed_val_right);
+      left_font_motor.writeMicroseconds(speed_val_left);
+      left_rear_motor.writeMicroseconds(speed_val_left);
+      right_rear_motor.writeMicroseconds(speed_val_right);
+      right_font_motor.writeMicroseconds(speed_val_right);
     }
 
     // only change turnCounter on correct turn, where wall to the left of the robot is less than 200mm away
@@ -205,10 +210,10 @@ STATE running() {
     speed_val_right = constrain(speed_val_right, 1000, 1750); // keeps right side speed between 1000 and 1750 ms
 
     // Writing power to motors
-    left_font_motor.write(speed_val_left);
-    left_rear_motor.write(speed_val_left);
-    right_rear_motor.write(speed_val_right);
-    right_font_motor.write(speed_val_right);
+    left_font_motor.writeMicroseconds(speed_val_left);
+    left_rear_motor.writeMicroseconds(speed_val_left);
+    right_rear_motor.writeMicroseconds(speed_val_right);
+    right_font_motor.writeMicroseconds(speed_val_right);
 
   }
 
@@ -541,60 +546,61 @@ void enable_motors()
   right_rear_motor.attach(right_rear);  // attaches the servo on pin right_rear to turn Vex Motor Controller 29 On
   right_font_motor.attach(right_front);  // attaches the servo on pin right_front to turn Vex Motor Controller 29 On
 }
+
 void stop() //Stop
 {
-  left_font_motor.write(1500);
-  left_rear_motor.write(1500);
-  right_rear_motor.write(1500);
-  right_font_motor.write(1500);
+  left_font_motor.writeMicroseconds(1500);
+  left_rear_motor.writeMicroseconds(1500);
+  right_rear_motor.writeMicroseconds(1500);
+  right_font_motor.writeMicroseconds(1500);
 }
 
 void forward()
 {
-  left_font_motor.write(1500 + speed_val);
-  left_rear_motor.write(1500 + speed_val);
-  right_rear_motor.write(1500 - speed_val);
-  right_font_motor.write(1500 - speed_val);
+  left_font_motor.writeMicroseconds(1500 + speed_val);
+  left_rear_motor.writeMicroseconds(1500 + speed_val);
+  right_rear_motor.writeMicroseconds(1500 - speed_val);
+  right_font_motor.writeMicroseconds(1500 - speed_val);
 }
 
 void reverse ()
 {
-  left_font_motor.write(1500 - speed_val);
-  left_rear_motor.write(1500 - speed_val);
-  right_rear_motor.write(1500 + speed_val);
-  right_font_motor.write(1500 + speed_val);
+  left_font_motor.writeMicroseconds(1500 - speed_val);
+  left_rear_motor.writeMicroseconds(1500 - speed_val);
+  right_rear_motor.writeMicroseconds(1500 + speed_val);
+  right_font_motor.writeMicroseconds(1500 + speed_val);
 }
 
 void ccw ()
 {
-  left_font_motor.write(1500 - speed_val);
-  left_rear_motor.write(1500 - speed_val);
-  right_rear_motor.write(1500 - speed_val);
-  right_font_motor.write(1500 - speed_val);
+  left_font_motor.writeMicroseconds(1500 - speed_val);
+  left_rear_motor.writeMicroseconds(1500 - speed_val);
+  right_rear_motor.writeMicroseconds(1500 - speed_val);
+  right_font_motor.writeMicroseconds(1500 - speed_val);
 }
 
 void cw ()
 {
-  left_font_motor.write(1500 + speed_val);
-  left_rear_motor.write(1500 + speed_val);
-  right_rear_motor.write(1500 + speed_val);
-  right_font_motor.write(1500 + speed_val);
+  left_font_motor.writeMicroseconds(1500 + speed_val);
+  left_rear_motor.writeMicroseconds(1500 + speed_val);
+  right_rear_motor.writeMicroseconds(1500 + speed_val);
+  right_font_motor.writeMicroseconds(1500 + speed_val);
 }
 
 void strafe_left ()
 {
-  left_font_motor.write(1500 - speed_val);
-  left_rear_motor.write(1500 + speed_val);
-  right_rear_motor.write(1500 + speed_val);
-  right_font_motor.write(1500 - speed_val);
+  left_font_motor.writeMicroseconds(1500 - speed_val);
+  left_rear_motor.writeMicroseconds(1500 + speed_val);
+  right_rear_motor.writeMicroseconds(1500 + speed_val);
+  right_font_motor.writeMicroseconds(1500 - speed_val);
 }
 
 void strafe_right ()
 {
-  left_font_motor.write(1500 + speed_val);
-  left_rear_motor.write(1500 - speed_val);
-  right_rear_motor.write(1500 - speed_val);
-  right_font_motor.write(1500 + speed_val);
+  left_font_motor.writeMicroseconds(1500 + speed_val);
+  left_rear_motor.writeMicroseconds(1500 - speed_val);
+  right_rear_motor.writeMicroseconds(1500 - speed_val);
+  right_font_motor.writeMicroseconds(1500 + speed_val);
 }
 
 // Two functions that calculate the distance from IR sensors on the front and left side respectively
