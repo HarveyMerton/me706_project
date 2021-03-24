@@ -1,3 +1,5 @@
+#import <Math.h>
+
 //Smoothing Filter Variables
 const int numReadings = 10; //Smoothing Array
 int readings[numReadings];  //Readings from sensor
@@ -16,7 +18,7 @@ const int IR_FR = A5;       //Front right infrared
 const int IR_LF = A6;       //Left front infrared
 const int IR_LR = A7;       //Lefr rear infrared
 
-float IR_threshold[5] = {-1,-1,-1,-1,-1}; //IR_FR, IR_FL, IR_LF, IR_LR, US
+float IR_threshold[5] = {-1,-1,-1,-1,-1}; //IR_FR, IR_FL, IR_LF, IR_LR
 
 void setup() {
   pinMode(IR_FL, INPUT);
@@ -32,6 +34,10 @@ void setup() {
 }
 
 void loop() {
+  readFxns();
+}
+/*
+void readHardCode(){ 
   Serial.flush();
   while(Serial.available() == 1){}
   Serial.read();
@@ -56,3 +62,46 @@ void loop() {
   Serial.print("Ultrasonic: ");
   Serial.print(HC_SR04_range());
 }
+*/
+
+
+void readFxns(){ 
+  //FR 
+  Serial.print("IR_FR: "); 
+  Serial.print(IR_FR_fxn());
+  
+  //FL
+  //Serial.print("IR_FL: "); 
+  //Serial.print(IR_FL_fxn());
+  /*
+  //LF 
+  Serial.print("IR_LF: "); 
+  Serial.print(IR_LF_fxn());
+  
+  //LR
+  Serial.print("IR_LR: "); 
+  Serial.print(IR_LR_fxn());
+  */
+}
+
+float IR_FR_fxn(){ 
+  float reading = analogRead(IR_FR); 
+  return pow(-0.0000265306*reading,3) + pow(0.026087248*reading,2) - 8.483151298*reading + 1096.927934; 
+}
+
+/*
+float IR_FL_fxn(){ 
+  float reading = analogRead(IR_FL); 
+  return =-0.0000265306*reading^3 + 0.026087248*reading^2 - 8.483151298*reading + 1096.927934; 
+}
+
+float IR_LF_fxn(){ 
+  float reading = analogRead(IR_LF);
+  return 24986.9915299999*reading^-1.013857328; 
+}
+
+float IR_LR_fxn(){ 
+  float reading = analogRead(IR_LR);
+  return pow(21937.28391*reading,-0.99154474);
+}
+*/
