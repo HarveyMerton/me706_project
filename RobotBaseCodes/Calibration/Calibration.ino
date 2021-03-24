@@ -17,7 +17,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define TEST_NO 5
+#define TEST_NO 10
 #define IR_FL A4
 #define IR_FR A5
 #define IR_LF A6
@@ -27,10 +27,18 @@
 #define ECHO_PIN 49
 #define MAX_DIST 23200
 
-int Ranges_IR_Long [TEST_NO] = {110,175,240,305,370};
-int Ranges_IR_Med [TEST_NO] = {210,385,560,735,910};
-int Ranges_Gyro [TEST_NO] = {0,90,170,270,360};
-int Ranges_Ultrasonic [TEST_NO] = {95,550,1000,1450,1890};
+int Ranges_IR_Long [TEST_NO] = {100,180,260,340,420,500,580,660,740,800};
+int Ranges_IR_Med [TEST_NO] = {40,70,100,130,160,190,220,250,280,300};
+int Ranges_Gyro [TEST_NO] = {0,0,45,90,135,180,225,270,315,360};
+int Ranges_Ultrasonic [TEST_NO] = {20,220,420,620,820,1020,1220,1420,1620,1820};
+
+//Smoothing Filter Variables
+const int numReadings = 10; //Smoothing Array
+int readings[numReadings];  //Readings from sensor
+int readIndex = 0;          //Current reading index
+int total = 0;              //Running total
+int average = 0;            //Average
+
 
 int ID = -1;
 
@@ -60,6 +68,9 @@ void setup() {
 
 void loop() {
   Calibration();
+  ID = -1;
+  Serial.println();
+  Serial.println();
 }
 
 void Calibration(){
@@ -70,23 +81,23 @@ void Calibration(){
   switch(ID){
     case 49: //1
       Serial.println("1");
-      Calibration_IR(IR_LF, Ranges_IR_Med, TEST_NO);
-      printResults(Ranges_IR_Med, TEST_NO);
+      Calibration_IR(IR_FL, Ranges_IR_Long, TEST_NO);
+      printResults(Ranges_IR_Long, TEST_NO);
       break;
     case 50: //2
       Serial.println("2");
-      Calibration_IR(IR_LF, Ranges_IR_Med, TEST_NO);
-      printResults(Ranges_IR_Med, TEST_NO);
+      Calibration_IR(IR_FR, Ranges_IR_Long, TEST_NO);
+      printResults(Ranges_IR_Long, TEST_NO);
       break;
     case 51: //3
       Serial.println("3");
-      Calibration_IR(IR_LF, Ranges_IR_Long, TEST_NO);
-      printResults(Ranges_IR_Long, TEST_NO);
+      Calibration_IR(IR_LF, Ranges_IR_Med, TEST_NO);
+      printResults(Ranges_IR_Med, TEST_NO);
       break;
     case 52: //4
       Serial.println("4");
-      Calibration_IR(IR_LF, Ranges_IR_Long, TEST_NO);
-      printResults(Ranges_IR_Long, TEST_NO);
+      Calibration_IR(IR_LR, Ranges_IR_Med, TEST_NO);
+      printResults(Ranges_IR_Med, TEST_NO);
       break;
     case 53: //5
       Serial.println("5");
