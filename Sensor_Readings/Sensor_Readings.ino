@@ -34,7 +34,11 @@ void setup() {
 }
 
 void loop() {
-  readFxns();
+  //Serial.println(IR_FR_fxn());
+  Serial.println(IR_FR_fxn());
+  //Serial.print(" "); 
+  //Serial.println(analogRead(IR_LF));
+  delay(500);
 }
 /*
 void readHardCode(){ 
@@ -66,9 +70,10 @@ void readHardCode(){
 
 
 void readFxns(){ 
-  //FR 
-  Serial.print("IR_FR: "); 
-  Serial.print(IR_FR_fxn());
+  //F 
+  Serial.println("IR_FR: "); 
+  Serial.println(IR_FR_fxn());
+  delay(500);
   
   //FL
   //Serial.print("IR_FL: "); 
@@ -86,7 +91,11 @@ void readFxns(){
 
 float IR_FR_fxn(){ 
   float reading = analogRead(IR_FR); 
-  return pow(-0.0000265306*reading,3) + pow(0.026087248*reading,2) - 8.483151298*reading + 1096.927934; 
+  //Serial.print("Raw reading: "); 
+  //Serial.println(reading);
+  //Serial.print("Function reading: ");
+  
+  return 152246.3973*pow(analogRead(IR_FR),-1.184450627);  //OLD FXN: pow(-0.0000265306*reading,3) + pow(0.026087248*reading,2) - 8.483151298*reading + 1096.927934; 
 }
 
 /*
@@ -94,6 +103,7 @@ float IR_FL_fxn(){
   float reading = analogRead(IR_FL); 
   return =-0.0000265306*reading^3 + 0.026087248*reading^2 - 8.483151298*reading + 1096.927934; 
 }
+
 
 float IR_LF_fxn(){ 
   float reading = analogRead(IR_LF);

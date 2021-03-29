@@ -27,8 +27,10 @@
 #define ECHO_PIN 49
 #define MAX_DIST 23200
 
-int Ranges_IR_Long [TEST_NO] = {100,180,260,340,420,500,580,660,740,800};
-int Ranges_IR_Med [TEST_NO] = {40,70,100,130,160,190,220,250,280,300};
+int Ranges_IR_Long [TEST_NO] = {75, 95, 115, 135, 155, 175, 195, 215, 235, 255}; 
+int Ranges_IR_Med [TEST_NO] = {40, 50, 60, 70, 80, 90, 100, 110, 120, 130}; 
+
+//70,100,130,160,190,220,250,280,300};
 int Ranges_Gyro [TEST_NO] = {0,0,45,90,135,180,225,270,315,360};
 int Ranges_Ultrasonic [TEST_NO] = {20,220,420,620,820,1020,1220,1420,1620,1820};
 
