@@ -1,6 +1,6 @@
 float Smoothing(int pin){
   total = total - readings[readIndex];         //Subtract the last reading
-  readings[readIndex] = analogRead(pin);  //Read from the sensor
+  readings[readIndex] = analogRead(pin);       //Read from the sensor
   total = total + readings[readIndex];         //Add the reading to the total
   readIndex = readIndex + 1;                   //Advance to the next position in the array
 

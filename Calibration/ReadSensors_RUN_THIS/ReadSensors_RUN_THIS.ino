@@ -16,9 +16,7 @@ const int MAX_DIST = 23200; //Maximum reading before error
 const int IR_FL = A4;       //Front left infrared
 const int IR_FR = A5;       //Front right infrared
 const int IR_LF = A6;       //Left front infrared
-const int IR_LR = A7;       //Lefr rear infrared
-
-float IR_threshold[5] = {-1,-1,-1,-1,-1}; //IR_FR, IR_FL, IR_LF, IR_LR
+const int IR_LR = A7;       //Left rear infrared
 
 void setup() {
   pinMode(IR_FL, INPUT);
@@ -34,61 +32,12 @@ void setup() {
 }
 
 void loop() {
+  
   Serial.println(IR_FR_fxn());
-  //Serial.print("LF reading: ");
-  //Serial.println(IR_LF_fxn());
   //Serial.print(" ");
   //Serial.print("LR reading (LF fxn)");
   //Serial.println(IR_LR_fxn());
   delay(1);
-}
-/*
-void readHardCode(){ 
-  Serial.flush();
-  while(Serial.available() == 1){}
-  Serial.read();
-
-  //FR 
-  Serial.print("IR_FR: "); 
-  Serial.print(Calibration(IR_FR));
-  
-  //FL
-  Serial.print("IR_FL: "); 
-  Serial.print(Calibration(IR_FL));
-  
-  //LF 
-  Serial.print("IR_LF: "); 
-  Serial.print(Calibration(IR_LF));
-  
-  //LR
-  Serial.print("IR_LR: "); 
-  Serial.print(Calibration(IR_LR));
-
-  //US
-  Serial.print("Ultrasonic: ");
-  Serial.print(HC_SR04_range());
-}
-*/
-
-
-void readFxns(){ 
-  //F 
-  Serial.println("IR_FR: "); 
-  Serial.println(IR_FR_fxn());
-  delay(1);
-  
-  //FL
-  //Serial.print("IR_FL: "); 
-  //Serial.print(IR_FL_fxn());
-  /*
-  //LF 
-  Serial.print("IR_LF: "); 
-  Serial.print(IR_LF_fxn());
-  
-  //LR
-  Serial.print("IR_LR: "); 
-  Serial.print(IR_LR_fxn());
-  */
 }
 
 float IR_FR_fxn(){ 
@@ -106,7 +55,6 @@ float IR_FL_fxn(){
   return =-0.0000265306*reading^3 + 0.026087248*reading^2 - 8.483151298*reading + 1096.927934; 
 }
 */
-
 
 float IR_LF_fxn(){ 
   float reading = Smoothing(IR_LF);

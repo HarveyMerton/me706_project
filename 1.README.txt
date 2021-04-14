@@ -1,0 +1,11 @@
+MECHENG 706 Project 1
+Group 18: Harvey Merton, Peter Mitchell, Vincent Wong and Hamish Giles
+
+- Calibration: 
+    - Calibration - For finding sensor functions (converts sensor readings to distances).
+    - ReadSensors - For reading the sensor results from calibrated functions (tests calibration).
+
+- Running code: 
+    - RobotBaseCodes - Codes required to run the robot. 
+    - Sensor.zip - Class that encapsulates all functions required to read all sensor types. 
+	This library must be included before running the code: Arduino>Sketch>Include 			library>Add .ZIP library. 
