@@ -27,8 +27,8 @@ int turnCount = 0;
 //double F_Kd = 0.0;
 //
 //Rotation Controller
-double R_Kp = 7.0;
-double R_Ki = 0.005;
+float R_Kp = 10;
+float R_Ki = 0.005;
 double R_Kd = 0.0;
 //
 //float l_target = 70;
@@ -134,21 +134,15 @@ void Straight() {
 }
 
 void Rotation() {
-      speed_val = 250;
       turn_error = 90 - GYRO.getReading();
-      turn_error_total = turn_error_total + turn_error;
-      
-      if (GYRO.getReading() < 80){
+      //turn_error_total = /*turn_error_total + */turn_error;
+      Serial.println(turn_error);
+      if (turn_error > 5){
 
-//        turn_speed = 1500 + R_Kp*turn_error + R_Ki*turn_error_total;
-//        turn_speed = constrain(turn_speed, 1250, 2000);
-//        
-//        left_font_motor.writeMicroseconds(turn_speed);
-//        left_rear_motor.writeMicroseconds(turn_speed);
-//        right_rear_motor.writeMicroseconds(turn_speed);
-//        right_font_motor.writeMicroseconds(turn_speed);
-          cw();
-        
+        turn_speed = 1500 + R_Kp*turn_error; //+ R_Ki*turn_error_total;
+        turn_speed = constrain(turn_speed, 1520, 1750);
+
+        SetMotorSpeed(turn_speed, turn_speed);
       } else {
         turnCount++;
         RunningState = SETUP;
