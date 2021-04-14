@@ -26,16 +26,17 @@ int turnCount = 0;
 //double F_Ki = 0.005;
 //double F_Kd = 0.0;
 //
-////Rotation Controller
-//double R_Kp = 7.0;
-//double R_Ki = 0.005;
-//double R_Kd = 0.0;
+//Rotation Controller
+double R_Kp = 7.0;
+double R_Ki = 0.005;
+double R_Kd = 0.0;
 //
 //float l_target = 70;
 //float f_target = 80;
 //
-//float turn_error = 0;
-//float turn_error_total = 0;
+float turn_error = 0;
+float turn_error_total = 0;
+int turn_speed = 0;
 
 void TaskMain() {
   Serial.println(RunningState);
@@ -58,20 +59,32 @@ void TaskMain() {
 }
 
 int target = 90; //Decrease = further out, increase = closer //350 380
-int forward_target = 150; //Decrease = further out, increase = closer //250 280
-float k = 15; //30 15 15 15
-float ki = 0.005; //0 0.1 0.01 0.005
+int forward_target = 140; //Decrease = further out, increase = closer //250 280
+float k = 20; //30 15 15 15
+float ki =0.00; //0 0.1 0.01 0.005
 int error_total = 0;
+double diff_error = 0;
+double kp_diff = 20;
+float ks = 4; //4
 
 void Setup() {
   //Align robot so its 150mm away from the wall on the left and 150mm away from the wall on the back
+  //RunningState = STRAIGHT;
+  speed_val = 150;
   double errorLeft = IR_LF.getReading() - IR_LR.getReading();
   double errorToWall = IR_LF.getReading() - target;
-    if (abs(errorLeft) > 7.5 || IR_LF.getReading() >= 130 || IR_LR.getReading() >= 130) {
+  
+    if (IR_LF.getReading() > 130 && IR_LR.getReading() > 130) {
         ccw();
     }
-    else if (errorToWall > 0) {
+    else if (errorToWall > 0 && abs(errorLeft) < 10) {
       strafe_left();
+    }
+    else if (errorLeft > 2) {
+        ccw();
+    }
+    else if (errorLeft < -2) {
+        cw();
     }
     else {
       stop();
@@ -86,9 +99,9 @@ void Straight() {
  static unsigned long previous_millis;
 
   //MY CODE
-
+  diff_error = IR_LF.getReading() - IR_LR.getReading();
   error = IR_LF.getReading() - target;
-  f_error =  IR_FR.getReading() - forward_target;
+  f_error = IR_FR.getReading() - forward_target;
 
   
   //error_total = constrain((error_total + error), -20, upper);
@@ -96,14 +109,13 @@ void Straight() {
 
   //Serial.println(error_total);
 
-  int speed_val_left = 1750 - error * k - ki*error_total;
-  int speed_val_right = 1250 - error * k - ki*error_total;
+  int speed_val_left = 1500 + constrain(ks*f_error, 100, 500) - (constrain(error*k, -250, 250) + constrain(kp_diff*diff_error, -100, 100));
+  int speed_val_right = 1500 - constrain(ks*f_error, 100, 500) - (constrain(error*k, -250, 250) + constrain(kp_diff*diff_error, -100, 100));
 
-  if (error > 5) {
-
-      int speed_val_left = 1500 - error * k - ki*error_total;
-      int speed_val_right = 1500 - error * k - ki*error_total;
-  }
+  //int speed_val_left = 1500 - error * k - ki*error_total - kp_diff*diff_error;
+  //int speed_val_right = 1500 - error * k - ki*error_total + kp_diff*diff_error;
+  //Serial.println(diff_error);
+  //Serial.print(speed_val_left); Serial.print(" | "); Serial.println(speed_val_right);
 
   
   if (f_error < 0) {
@@ -114,50 +126,32 @@ void Straight() {
       RunningState = STOP;
     } else {
       RunningState = ROTATION;
-    }
-      
-            
+    }        
   } else { //Move forward and keep straight
-
-    if (speed_val_left > 2000) {
-      speed_val_left = 2000;
-    }
-  
-    if (speed_val_left < 1250) {
-      speed_val_left = 1250;
-    }
-    
-    if (speed_val_right > 1750) {
-      speed_val_right = 1750;
-    }
-  
-    if (speed_val_right < 1000) {
-      speed_val_right = 1000;
-    }
-
-  
-    left_font_motor.writeMicroseconds(speed_val_left);
-    left_rear_motor.writeMicroseconds(speed_val_left);
-  
-    right_rear_motor.writeMicroseconds(speed_val_right);
-    right_font_motor.writeMicroseconds(speed_val_right);
-
+    stop();
+    SetMotorSpeed(speed_val_left, speed_val_right);
   }
 }
 
 void Rotation() {
+      speed_val = 250;
+      turn_error = 90 - GYRO.getReading();
+      turn_error_total = turn_error_total + turn_error;
+      
+      if (GYRO.getReading() < 80){
 
-      if (GYRO.getReading() < 85.00){ //ASDF
-          Serial.println(GYRO.getReading());
-          left_font_motor.writeMicroseconds(1500 + 250);
-          left_rear_motor.writeMicroseconds(1500 + 250);
-          right_rear_motor.writeMicroseconds(1500 + 250);
-          right_font_motor.writeMicroseconds(1500 + 250);
-          Serial.println(GYRO.getReading());
-      } 
-      else {
-          turnCount++;
-      RunningState = STRAIGHT;
+//        turn_speed = 1500 + R_Kp*turn_error + R_Ki*turn_error_total;
+//        turn_speed = constrain(turn_speed, 1250, 2000);
+//        
+//        left_font_motor.writeMicroseconds(turn_speed);
+//        left_rear_motor.writeMicroseconds(turn_speed);
+//        right_rear_motor.writeMicroseconds(turn_speed);
+//        right_font_motor.writeMicroseconds(turn_speed);
+          cw();
+        
+      } else {
+        turnCount++;
+        RunningState = SETUP;
       }
 
   

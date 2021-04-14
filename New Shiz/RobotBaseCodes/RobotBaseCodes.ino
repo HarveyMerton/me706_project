@@ -62,7 +62,7 @@ Servo right_font_motor;  // create servo object to control Vex Motor Controller 
 Servo turret_motor;
 
 //Speed variables
-int speed_val = 100;
+int speed_val = 0;
 int speed_change;
 
 //Serial Pointer
