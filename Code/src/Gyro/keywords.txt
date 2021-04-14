@@ -1,9 +1,0 @@
-Gyro	KEYWORD1
-calibrate	KEYWORD2
-readAngRate	KEYWORD2
-getAng	KEYWORD2
-setAng	KEYWORD2
-countOn	KEYWORD2
-countOff	KEYWORD2
-reset	KEYWORD2
-timerSetup KEYWORD2
