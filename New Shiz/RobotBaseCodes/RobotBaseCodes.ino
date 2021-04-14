@@ -89,8 +89,8 @@ void setup(void)
   //Sensor Offsets
   IR_FL.setOffset(-2.5);
   IR_FR.setOffset(-4.5);
-  IR_LF.setOffset(3);
-  IR_LR.setOffset(-3);
+  IR_LF.setOffset(0);
+  IR_LR.setOffset(0);
   ULTRA.setOffset(30);
 
   //Sesnor Initialisation
@@ -263,12 +263,12 @@ boolean is_battery_voltage_OK()
 
   if (Lipo_level_cal > 0 && Lipo_level_cal < 160) {
     previous_millis = millis();
-    SerialCom->print("Lipo level:");
-    SerialCom->print(Lipo_level_cal);
-    SerialCom->print("%");
-    SerialCom->print(" : Raw Lipo:");
-    SerialCom->println(raw_lipo);
-    SerialCom->println("");
+//    SerialCom->print("Lipo level:");
+//    SerialCom->print(Lipo_level_cal);
+//    SerialCom->print("%");
+//    SerialCom->print(" : Raw Lipo:");
+//    SerialCom->println(raw_lipo);
+//    SerialCom->println("");
     Low_voltage_counter = 0;
     return true;
   } else {
