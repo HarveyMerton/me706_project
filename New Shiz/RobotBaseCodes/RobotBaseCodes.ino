@@ -23,7 +23,7 @@
 #include <Sensor.h> //Needed for Sensor Readings
 
 //#define NO_READ_GYRO  //Uncomment of GYRO is not attached.
-//#define NO_HC-SR04 //Uncomment of HC-SR04 ultrasonic ranging sensor is not attached.
+#define NO_HC-SR04 //Uncomment of HC-SR04 ultrasonic ranging sensor is not attached.
 //#define NO_BATTERY_V_OK //Uncomment of BATTERY_V_OK if you do not care about battery damage.
 
 //State machine states
@@ -51,7 +51,6 @@ const byte right_front = 51;
 
 //Default ultrasonic ranging sensor pins, these pins are defined my the Shield
 const int TRIG_PIN = 48;
-const int ECHO_PIN = 49;
 
 // Anything over 400 cm (23200 us pulse) is "out of range". Hit:If you decrease to this the ranging sensor but the timeout is short, you may not need to read up to 4meters.
 const unsigned int MAX_DIST = 23200;
@@ -89,8 +88,8 @@ void setup(void)
   //Sensor Offsets
   IR_FL.setOffset(-2.5);
   IR_FR.setOffset(-4.5);
-  IR_LF.setOffset(0);
-  IR_LR.setOffset(0);
+  IR_LF.setOffset(3);
+  IR_LR.setOffset(-3);
   ULTRA.setOffset(30);
 
   //Sesnor Initialisation
@@ -144,8 +143,8 @@ STATE running() {
     //previous_millis = millis();
 
     //SerialCom->println("RUNNING---------");
-    //TaskMain();
-    GetSensorReadings();
+    TaskMain();
+    //GetSensorReadings();
 //speed_change_smooth();
 //    Analog_Range_A4();
 //
