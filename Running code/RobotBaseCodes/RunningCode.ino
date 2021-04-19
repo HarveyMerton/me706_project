@@ -9,7 +9,7 @@ double speed_val_rotate = 0;
 double speed_val_setup = 150;
 
 //Power Allocation
-double max_power_staight = 500;
+double max_power_staight = 250;
 double min_power_straight = 100;
 double power_side = 250;
 double power_difference = 100;
@@ -28,8 +28,8 @@ double rotateError;
 
 //Controller Gains
 double F_Kp = 4;  //Forward Controller
-double S_Kp = 20; //Side Controller
-double D_Kp = 20; //Difference Controller
+double S_Kp = 50; //Side Controller
+double D_Kp = 0; //Difference Controller
 double R_Kp = 10;  //Rotation Controller
 
 
@@ -97,6 +97,7 @@ void Straight() {
     //FSM state exit condition
     stop();
     GYRO.setAngle(0);
+    GYRO.initialise();
     if (turnCount >= 3) {RunningState = STOP;}
     else {RunningState = ROTATION;}   
   }

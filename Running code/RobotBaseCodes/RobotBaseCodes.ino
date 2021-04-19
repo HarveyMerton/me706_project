@@ -142,8 +142,9 @@ STATE running() {
   //if (millis() - previous_millis > 500) {  //Arduino style 500ms timed execution statement
     //previous_millis = millis();
 
-    SerialCom->println("RUNNING---------");
+    //SerialCom->println("RUNNING---------");
     TaskMain(); //Running Code for Project One
+    //GetSensorReadings();
 
 #ifndef NO_BATTERY_V_OK
     if (!is_battery_voltage_OK()) return STOPPED;
@@ -251,12 +252,12 @@ boolean is_battery_voltage_OK()
 
   if (Lipo_level_cal > 0 && Lipo_level_cal < 160) {
     previous_millis = millis();
-    SerialCom->print("Lipo level:");
-    SerialCom->print(Lipo_level_cal);
-    SerialCom->print("%");
-    SerialCom->print(" : Raw Lipo:");
-    SerialCom->println(raw_lipo);
-    SerialCom->println("");
+//    SerialCom->print("Lipo level:");
+//    SerialCom->print(Lipo_level_cal);
+//    SerialCom->print("%");
+//    SerialCom->print(" : Raw Lipo:");
+//    SerialCom->println(raw_lipo);
+//    SerialCom->println("");
     Low_voltage_counter = 0;
     return true;
   } else {
