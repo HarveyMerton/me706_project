@@ -28,8 +28,8 @@ double rotateError;
 
 //Controller Gains
 double F_Kp = 4;  //Forward Controller
-double S_Kp = 50; //Side Controller
-double D_Kp = 0; //Difference Controller
+double S_Kp = 20; //Side Controller 
+double D_Kp = 20; //Difference Controller
 double R_Kp = 10;  //Rotation Controller
 
 

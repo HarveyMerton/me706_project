@@ -252,12 +252,12 @@ boolean is_battery_voltage_OK()
 
   if (Lipo_level_cal > 0 && Lipo_level_cal < 160) {
     previous_millis = millis();
-//    SerialCom->print("Lipo level:");
-//    SerialCom->print(Lipo_level_cal);
-//    SerialCom->print("%");
-//    SerialCom->print(" : Raw Lipo:");
-//    SerialCom->println(raw_lipo);
-//    SerialCom->println("");
+    SerialCom->print("Lipo level:");
+    SerialCom->print(Lipo_level_cal);
+    SerialCom->print("%");
+    SerialCom->print(" : Raw Lipo:");
+    SerialCom->println(raw_lipo);
+    SerialCom->println("");
     Low_voltage_counter = 0;
     return true;
   } else {
