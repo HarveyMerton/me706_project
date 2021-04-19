@@ -19,8 +19,8 @@
   Modified: 15/02/2018
   Author: Logan Stuart
 */
-#include "src/Servo_m/src/Servo_m.h"  //Need for Servo pulse output
-#include "src/Gyro/Gyro.h"
+#include <Servo.h>  //Need for Servo pulse output
+#include "src/Sensor/Sensor.h"
 
 //#define NO_READ_GYRO  //Uncomment of GYRO is not attached.
 #define NO_HC-SR04 //Uncomment of HC-SR04 ultrasonic ranging sensor is not attached.
@@ -29,15 +29,13 @@
 //Define pins
 #define PIN_GYRO_DAT 3 //Analogue 3 
 
-//Define gyro object
-Gyro gyro = Gyro(PIN_GYRO_DAT);
-
 
 //State machine states
 enum STATE {
   INITIALISING,
   RUNNING,
-  STOPPED
+  STOPPED,
+  STRAFE
 };
 
 //Refer to Shield Pinouts.jpg for pin locations
@@ -56,11 +54,17 @@ const int ECHO_PIN = 49;
 // Anything over 400 cm (23200 us pulse) is "out of range". Hit:If you decrease to this the ranging sensor but the timeout is short, you may not need to read up to 4meters.
 const unsigned int MAX_DIST = 23200;
 
-Servo_m left_font_motor;  // create servo object to control Vex Motor Controller 29
-Servo_m left_rear_motor;  // create servo object to control Vex Motor Controller 29
-Servo_m right_rear_motor;  // create servo object to control Vex Motor Controller 29
-Servo_m right_font_motor;  // create servo object to control Vex Motor Controller 29
-Servo_m turret_motor;
+Sensor IR_FL("IRLONG", A4);
+Sensor IR_FR("IRLONG", A5);
+Sensor IR_LF("IRSHORT", A6);
+Sensor IR_LR("IRSHORT", A7);
+Sensor ULTRA("ULTRASONIC", 48, 49);
+Sensor GYRO("GYROSCOPE", A3);
+
+Servo left_font_motor;  // create servo object to control Vex Motor Controller 29
+Servo left_rear_motor;  // create servo object to control Vex Motor Controller 29
+Servo right_rear_motor;  // create servo object to control Vex Motor Controller 29
+Servo right_font_motor;
 
 
 int speed_val = 100;
@@ -73,7 +77,7 @@ int pos = 0;
 void setup(void)
 {
   cli();
-  turret_motor.attach(11);
+  //turret_motor.attach(11);
   pinMode(LED_BUILTIN, OUTPUT);
 
   // The Trigger pin will tell the sensor to range find
@@ -88,9 +92,12 @@ void setup(void)
   SerialCom->println("Setup....");
 
   //Setup gyro
-  gyro.timerSetup();
-  gyro.calibrate(); 
-  gyro.countOn();
+  IR_FL.initialise();
+  IR_FR.initialise();
+  IR_LF.initialise();
+  IR_LR.initialise();
+  ULTRA.initialise();
+  GYRO.initialise();
 
   delay(1000); //settling time but no really needed
   sei();
@@ -110,6 +117,9 @@ void loop(void) //main loop
     case STOPPED: //Stop of Lipo Battery voltage is too low, to protect Battery
       machine_state =  stopped();
       break;
+    case STRAFE: //Stop of Lipo Battery voltage is too low, to protect Battery
+      machine_state =  strafe();
+      break;
   };
 }
 
@@ -121,20 +131,37 @@ STATE initialising() {
   SerialCom->println("Enabling Motors...");
   enable_motors();
   SerialCom->println("RUNNING STATE...");
-  return RUNNING;
+  return STRAFE;
 }
 
 int error = 0;
 int f_error = 0;
 
 
-int target = 430; //Decrease = further out, increase = closer //350 380
-int forward_target = 330; //Decrease = further out, increase = closer //250 280
+int target = 100; //Decrease = further out, increase = closer //350 380
+int forward_target = 100; //Decrease = further out, increase = closer //250 280
 float k = 7;
 
 float ki = 0.005;
 
 int error_total = 0;
+
+STATE strafe() {
+
+  int sideError = IR_LF.getReading() - target;
+  int differenceError = IR_LF.getReading() - IR_LR.getReading();
+
+    if (IR_LF.getReading() > 130 && IR_LR.getReading() > 130) {strafe_left();}
+    else if (sideError > 0 && abs(differenceError) < 10) {strafe_left();}
+    else if (differenceError > 2) {ccw();}
+    else if (differenceError < -2) {cw();}
+    else {
+      return RUNNING;
+    }
+
+    return STRAFE;
+  
+}
 
 STATE running() {
 
@@ -142,8 +169,8 @@ STATE running() {
 
   //MY CODE
 
-  error = target - analogRead(A4);
-  f_error = forward_target - analogRead(A5);
+  error = IR_LF.getReading() - target;
+  f_error = IR_FR.getReading() - forward_target;
 
   error_total = error_total + error;
 
@@ -160,15 +187,18 @@ STATE running() {
   if (f_error < 0) {
     //gyro.reset();
     //gyro.countOn();
-    gyro.reset();
-      while(gyro.getAng() < 85.00){ //ASDF
-          Serial.println(gyro.getAng());
+    GYRO.setAngle(0);
+    GYRO.initialise();
+      while(GYRO.getReading() < 85.00){ //ASDF
+          Serial.println(GYRO.getReading());
           left_font_motor.writeMicroseconds(1500 + 250);
           left_rear_motor.writeMicroseconds(1500 + 250);
           right_rear_motor.writeMicroseconds(1500 + 250);
           right_font_motor.writeMicroseconds(1500 + 250);
-          Serial.println(gyro.getAng());
       }
+
+      return STRAFE;
+
       
       //Serial.println("Exit");
       //gyro.countOff();
@@ -209,6 +239,9 @@ STATE running() {
 
     SerialCom->print("Error: ");
     SerialCom->print(error);
+
+    SerialCom->print(" | LeftReading: ");
+    SerialCom->print(IR_LF.getReading());
     SerialCom->print(" | Right: ");
     SerialCom->print(speed_val_right);
     SerialCom->print(" | Left: ");
@@ -587,15 +620,4 @@ void strafe_right ()
   left_rear_motor.writeMicroseconds(1500 - speed_val);
   right_rear_motor.writeMicroseconds(1500 - speed_val);
   right_font_motor.writeMicroseconds(1500 + speed_val);
-}
-
-
-
-//Interrupt for tc1 - get gyro value for integration
-ISR(TIMER3_COMPA_vect){ 
-  //Serial.println(1.0/GYRO_Fs);
-  //Serial.println(gyro.getAng() + gyro.readAngRate()*(1.0/GYRO_Fs));
-  gyro.setAng(gyro.getAng() + gyro.readAngRate()*(1.0/GYRO_Fs));  
-  //Serial.println(gyro.getAng()); 
-  //j++;
 }
