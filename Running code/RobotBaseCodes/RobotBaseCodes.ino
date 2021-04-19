@@ -82,12 +82,12 @@ void setup(void)
   SerialCom = &Serial;
   SerialCom->begin(115200);
   SerialCom->println("MECHENG706_Base_Code_25/01/2018");
-  delay(1000);
+  //delay(1000);
   SerialCom->println("Setup....");
 
   //Sensor Offsets
-  IR_FL.setOffset(-2.5);
-  IR_FR.setOffset(-4.5);
+  IR_FL.setOffset(0);
+  IR_FR.setOffset(0);
   IR_LF.setOffset(3);
   IR_LR.setOffset(-3);
   ULTRA.setOffset(30);
@@ -100,7 +100,7 @@ void setup(void)
   ULTRA.initialise();
   GYRO.initialise();
   
-  delay(1000); //settling time but no really needed
+  //delay(1000); //settling time but no really needed
 
 }
 
@@ -125,7 +125,7 @@ void loop(void) //main loop
 STATE initialising() {
   //initialising
   SerialCom->println("INITIALISING....");
-  delay(1000); //One second delay to see the serial string "INITIALISING...."
+  //delay(1000); //One second delay to see the serial string "INITIALISING...."
   SerialCom->println("Enabling Motors...");
   enable_motors();
   SerialCom->println("RUNNING STATE...");
@@ -252,12 +252,12 @@ boolean is_battery_voltage_OK()
 
   if (Lipo_level_cal > 0 && Lipo_level_cal < 160) {
     previous_millis = millis();
-    SerialCom->print("Lipo level:");
-    SerialCom->print(Lipo_level_cal);
-    SerialCom->print("%");
-    SerialCom->print(" : Raw Lipo:");
-    SerialCom->println(raw_lipo);
-    SerialCom->println("");
+//    SerialCom->print("Lipo level:");
+//    SerialCom->print(Lipo_level_cal);
+//    SerialCom->print("%");
+//    SerialCom->print(" : Raw Lipo:");
+//    SerialCom->println(raw_lipo);
+//    SerialCom->println("");
     Low_voltage_counter = 0;
     return true;
   } else {

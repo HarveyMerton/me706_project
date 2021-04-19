@@ -11,7 +11,7 @@ double speed_val_setup = 150;
 //Power Allocation
 double max_power_staight = 250;
 double min_power_straight = 100;
-double power_side = 250;
+double max_power_side = 250;
 double power_difference = 100;
 double max_power_rotate = 250;
 double min_power_rotate = 20;
@@ -28,12 +28,14 @@ double rotateError;
 
 //Controller Gains
 double F_Kp = 4;  //Forward Controller
-double S_Kp = 20; //Side Controller 
-double D_Kp = 20; //Difference Controller
+double S_Kp = 7; //Side Controller
+double D_Kp = 2; //Difference Controller
 double R_Kp = 10;  //Rotation Controller
 
 
 void TaskMain() {
+  Serial.println(RunningState);
+  
   //FSM for running all tasks required
   switch (RunningState) {
     case SETUP:
@@ -59,19 +61,24 @@ void Setup() {
   speed_val = speed_val_setup;  //Increases motor speed
 
   //Error calculation
-  sideError = IR_LF.getReading() - sideTarget;
+  sideError = IR_LF.getReading() - (sideTarget + 17);
   differenceError = IR_LF.getReading() - IR_LR.getReading();
 
+  if (differenceError > 20) return ccw();
+  if (sideError > 0) return strafe_left();
+
+  RunningState = STRAIGHT;
+
   //Logic to get robot properly aligned for driving straight
-  if (IR_LF.getReading() > 130 && IR_LR.getReading() > 130) {ccw();}
-  else if (sideError > 0 && abs(differenceError) < 10) {strafe_left();}
-  else if (differenceError > 2) {ccw();}
-  else if (differenceError < -2) {cw();}
-  else {
-    //FSM state exit condition
-    stop();
-    RunningState = STRAIGHT;
-  }
+//  if (IR_LF.getReading() > 130 && IR_LR.getReading() > 130) {strafe_left();}
+//  else if (sideError > 5 && abs(differenceError) < 10) {strafe_left();}
+//  else if (differenceError > 2) {ccw();}
+//  else if (differenceError < -2) {cw();}
+//  else {
+//    //FSM state exit condition
+//    stop();
+//    RunningState = STRAIGHT;
+//  }
 }
 
 
@@ -84,11 +91,13 @@ void Straight() {
 
   //Controller power calculation
   double power_front = constrain(F_Kp*frontError, min_power_straight, max_power_staight);
-  double power_side = constrain(S_Kp*sideError, -power_side, power_side) + constrain(D_Kp*differenceError, -power_difference, power_difference);
+  double power_side = constrain(S_Kp*sideError, -1*max_power_side, max_power_side) + constrain(D_Kp*differenceError, -1*power_difference, power_difference);
 
   //Motor speeds
   speed_val_left = 1500 + power_front - power_side;
   speed_val_right = 1500 - power_front - power_side;
+
+  Serial.print(power_side); Serial.print(" | "); Serial.println(speed_val_right);
   
   if (frontError > 0) {
     SetMotorSpeed(speed_val_left, speed_val_right);
@@ -139,7 +148,7 @@ void GetSensorReadings() {
   SerialCom->print(" ");
   SerialCom->print(IR_LF.getReading());
   SerialCom->print(" ");
-  SerialCom->print(IR_LR.getReading());+
+  SerialCom->print(IR_LR.getReading());
   SerialCom->print(" ");
   SerialCom->print(ULTRA.getReading());
   SerialCom->print(" ");
