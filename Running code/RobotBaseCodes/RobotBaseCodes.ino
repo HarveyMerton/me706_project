@@ -62,7 +62,7 @@ Servo right_font_motor;  // create servo object to control Vex Motor Controller 
 Servo turret_motor;
 
 //Speed variables
-int speed_val = 0;
+int speed_val = 100;
 int speed_change;
 
 //Serial Pointer
@@ -88,7 +88,7 @@ void setup(void)
   //Sensor Offsets
   IR_FL.setOffset(0);
   IR_FR.setOffset(0);
-  IR_LF.setOffset(3);
+  IR_LF.setOffset(-6);
   IR_LR.setOffset(-3);
   ULTRA.setOffset(30);
 

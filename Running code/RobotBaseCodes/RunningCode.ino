@@ -18,8 +18,8 @@ double min_power_rotate = 20;
 
 //Running Code Variables
 int turnCount = 0;
-int frontTarget = 140;
-int sideTarget = 90;
+int frontTarget = 180; //140 160 170
+int sideTarget = 80; // 85
 int rotateTarget = 90;
 double sideError;
 double sideErrorTotal = 0; 
@@ -28,18 +28,18 @@ double differenceError;
 double differenceErrorTotal = 0; 
 double rotateError;
 
-double intDistSide = 20; //For ant-integrator windup
-double intDistDiff = 20;
+double intDistSide = 40; //For ant-integrator windup // 20, 40
+double intDistDiff = 40; // 20, 40, 60, 40 
 
 double sideErrorExit = 2; //For exiting setup
 double differenceErrorExit = 2;
 
 //Controller Gains
 double F_Kp = 4;  //Forward Controller
-double S_Kp = 7; //Side Controller
-double S_Ki = 0.1;
+double S_Kp = 7; //Side Controller, 7
+double S_Ki = 0.18; // 0.3 0.18
 double D_Kp = 4; //Difference Controller //2, 5,4 
-double D_Ki = 2; //1, 
+double D_Ki = 0; //1, 2, 4, 5, 10
 double R_Kp = 10;  //Rotation Controller
 
 
@@ -65,7 +65,6 @@ void TaskMain() {
   }  
 }
 
-
 void Setup() {
   //Aligns the side of the robot with the wall
   //speed_val = speed_val_setup;  //Increases motor speed
@@ -75,20 +74,32 @@ void Setup() {
   if(abs(sideError) < intDistSide){sideErrorTotal += sideError;} // Anti-integrator windup
   
   differenceError = IR_LF.getReading() - IR_LR.getReading();
-  if(abs(differenceErrorTotal) < intDistDiff){differenceErrorTotal += differenceError;} // Anti-integrator windup
+  if(abs(differenceErrorTotal) < intDistDiff){differenceErrorTotal += abs(differenceError);} // Anti-integrator windup
   
-  double wallPower = constrain(S_Kp*sideError + S_Ki*sideErrorTotal, -50, 50); //250
+  double wallPower = constrain(S_Kp*sideError + S_Ki*sideErrorTotal, -100, 100); //250
   double diffPower = constrain(D_Kp*differenceError + D_Ki*differenceErrorTotal, -250, 250);
-
-  //speed_val = 1500 + power_front - power_side;
 
   left_font_motor.writeMicroseconds(1500 - wallPower - diffPower);
   left_rear_motor.writeMicroseconds(1500 + wallPower - diffPower);
   right_rear_motor.writeMicroseconds(1500 + wallPower - diffPower);
   right_font_motor.writeMicroseconds(1500 - wallPower - diffPower);
 
-  Serial.println(wallPower); /// CURRENTLY HERE FOR TESTING
+
+  // Serial.println(wallPower); /// CURRENTLY HERE FOR TESTING
+  Serial.print("wallPower: ");
+  Serial.println(wallPower); 
+//  Serial.print(" || ");
+
+Serial.print("diffPower: ");
   Serial.println(diffPower); 
+  SerialCom->print(IR_LF.getReading());
+  SerialCom->print(" ");
+  SerialCom->println(IR_LR.getReading());
+
+
+//  Serial.print("Difference error total: ");
+//  Serial.print(differenceErrorTotal);
+//  Serial.println(" ");
 
   //if (differenceError > 20) return ccw();
   //if (sideError > 0) return strafe_left();
