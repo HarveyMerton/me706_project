@@ -82,12 +82,12 @@ void setup(void)
   SerialCom = &Serial;
   SerialCom->begin(115200);
   SerialCom->println("MECHENG706_Base_Code_25/01/2018");
-  delay(1000);
+  //delay(1000);
   SerialCom->println("Setup....");
 
   //Sensor Offsets
-  IR_FL.setOffset(-2.5);
-  IR_FR.setOffset(-4.5);
+  IR_FL.setOffset(0);
+  IR_FR.setOffset(0);
   IR_LF.setOffset(3);
   IR_LR.setOffset(-3);
   ULTRA.setOffset(30);
@@ -100,7 +100,7 @@ void setup(void)
   ULTRA.initialise();
   GYRO.initialise();
   
-  delay(1000); //settling time but no really needed
+  //delay(1000); //settling time but no really needed
 
 }
 
@@ -125,7 +125,7 @@ void loop(void) //main loop
 STATE initialising() {
   //initialising
   SerialCom->println("INITIALISING....");
-  delay(1000); //One second delay to see the serial string "INITIALISING...."
+  //delay(1000); //One second delay to see the serial string "INITIALISING...."
   SerialCom->println("Enabling Motors...");
   enable_motors();
   SerialCom->println("RUNNING STATE...");
@@ -143,18 +143,8 @@ STATE running() {
     //previous_millis = millis();
 
     //SerialCom->println("RUNNING---------");
-    TaskMain();
+    TaskMain(); //Running Code for Project One
     //GetSensorReadings();
-//speed_change_smooth();
-//    Analog_Range_A4();
-//
-//#ifndef NO_READ_GYRO
-//    GYRO_reading();
-//#endif
-//
-//#ifndef NO_HC-SR04
-//    HC_SR04_range();
-//#endif
 
 #ifndef NO_BATTERY_V_OK
     if (!is_battery_voltage_OK()) return STOPPED;
