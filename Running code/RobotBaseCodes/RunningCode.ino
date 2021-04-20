@@ -22,14 +22,19 @@ int frontTarget = 140;
 int sideTarget = 90;
 int rotateTarget = 90;
 double sideError;
+double sideErrorTotal = 0; 
 double frontError;
 double differenceError;
+double differenceErrorTotal = 0; 
 double rotateError;
+
 
 //Controller Gains
 double F_Kp = 4;  //Forward Controller
 double S_Kp = 7; //Side Controller
+double S_Ki = 0.1;
 double D_Kp = 2; //Difference Controller
+double D_Ki = 0.1;
 double R_Kp = 10;  //Rotation Controller
 
 
@@ -58,16 +63,32 @@ void TaskMain() {
 
 void Setup() {
   //Aligns the side of the robot with the wall
-  speed_val = speed_val_setup;  //Increases motor speed
+  //speed_val = speed_val_setup;  //Increases motor speed
 
   //Error calculation
-  sideError = IR_LF.getReading() - (sideTarget + 17);
+  sideError = IR_LR.getReading() - (sideTarget);
+  if(abs(sideError) < 5){sideErrorTotal += sideError;} // Anti-integrator windup
+  
   differenceError = IR_LF.getReading() - IR_LR.getReading();
+  if(abs(differenceErrorTotal) < 5){differenceErrorTotal += differenceError;} // Anti-integrator windup
+  
+  double wallPower = constrain(S_Kp*sideError + S_Ki*sideErrorTotal, -250, 250);
+  double diffPower = constrain(D_Kp*differenceError + D_Ki*differenceErrorTotal, -1*max_power_side, max_power_side);
 
-  if (differenceError > 20) return ccw();
-  if (sideError > 0) return strafe_left();
+  //speed_val = 1500 + power_front - power_side;
 
-  RunningState = STRAIGHT;
+  left_font_motor.writeMicroseconds(1500 - wallPower - diffPower);
+  left_rear_motor.writeMicroseconds(1500 + wallPower - diffPower);
+  right_rear_motor.writeMicroseconds(1500 + wallPower - diffPower);
+  right_font_motor.writeMicroseconds(1500 - wallPower - diffPower);
+
+  //if (differenceError > 20) return ccw();
+  //if (sideError > 0) return strafe_left();
+  if (abs(sideError) < 2 && abs(differenceError) < 2) {
+    RunningState = STRAIGHT;
+    sideErrorTotal = 0; 
+    differenceErrorTotal = 0; 
+  }
 
   //Logic to get robot properly aligned for driving straight
 //  if (IR_LF.getReading() > 130 && IR_LR.getReading() > 130) {strafe_left();}
