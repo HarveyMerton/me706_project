@@ -28,13 +28,18 @@ double differenceError;
 double differenceErrorTotal = 0; 
 double rotateError;
 
+double intDistSide = 20; //For ant-integrator windup
+double intDistDiff = 20;
+
+double sideErrorExit = 2; //For exiting setup
+double differenceErrorExit = 2;
 
 //Controller Gains
 double F_Kp = 4;  //Forward Controller
 double S_Kp = 7; //Side Controller
 double S_Ki = 0.1;
-double D_Kp = 2; //Difference Controller
-double D_Ki = 0.1;
+double D_Kp = 4; //Difference Controller //2, 5,4 
+double D_Ki = 2; //1, 
 double R_Kp = 10;  //Rotation Controller
 
 
@@ -66,14 +71,14 @@ void Setup() {
   //speed_val = speed_val_setup;  //Increases motor speed
 
   //Error calculation
-  sideError = IR_LR.getReading() - (sideTarget);
-  if(abs(sideError) < 5){sideErrorTotal += sideError;} // Anti-integrator windup
+  sideError = IR_LF.getReading() - (sideTarget);
+  if(abs(sideError) < intDistSide){sideErrorTotal += sideError;} // Anti-integrator windup
   
   differenceError = IR_LF.getReading() - IR_LR.getReading();
-  if(abs(differenceErrorTotal) < 5){differenceErrorTotal += differenceError;} // Anti-integrator windup
+  if(abs(differenceErrorTotal) < intDistDiff){differenceErrorTotal += differenceError;} // Anti-integrator windup
   
-  double wallPower = constrain(S_Kp*sideError + S_Ki*sideErrorTotal, -250, 250);
-  double diffPower = constrain(D_Kp*differenceError + D_Ki*differenceErrorTotal, -1*max_power_side, max_power_side);
+  double wallPower = constrain(S_Kp*sideError + S_Ki*sideErrorTotal, -50, 50); //250
+  double diffPower = constrain(D_Kp*differenceError + D_Ki*differenceErrorTotal, -250, 250);
 
   //speed_val = 1500 + power_front - power_side;
 
@@ -82,9 +87,12 @@ void Setup() {
   right_rear_motor.writeMicroseconds(1500 + wallPower - diffPower);
   right_font_motor.writeMicroseconds(1500 - wallPower - diffPower);
 
+  Serial.println(wallPower); /// CURRENTLY HERE FOR TESTING
+  Serial.println(diffPower); 
+
   //if (differenceError > 20) return ccw();
   //if (sideError > 0) return strafe_left();
-  if (abs(sideError) < 2 && abs(differenceError) < 2) {
+  if (abs(differenceError) < differenceErrorExit && abs(sideError) < sideErrorExit) { //&& abs(differenceError) < dfferenceErrorExit) { //UNCOMMENTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
     RunningState = STRAIGHT;
     sideErrorTotal = 0; 
     differenceErrorTotal = 0; 
