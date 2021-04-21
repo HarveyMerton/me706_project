@@ -31,8 +31,8 @@ double rotateError;
 double intDistSide = 40; //For ant-integrator windup // 20, 40
 double intDistDiff = 40; // 20, 40, 60, 40 
 
-double sideErrorExit = 1.5; //For exiting setup
-double differenceErrorExit = 1.5;
+double sideErrorExit = 2; //For exiting setup
+double differenceErrorExit = 2;
 
 //Controller Gains
 double F_Kp = 4;  //Forward Controller
@@ -72,12 +72,12 @@ void Setup() {
 
   //Error calculation
   sideError = IR_LF.getReading() - (sideTarget);
-  sideErrorTotal += sideError;
-  //if(abs(sideError) < intDistSide){sideErrorTotal += sideError;} // Anti-integrator windup
+  //sideErrorTotal += sideError;
+  if(abs(sideError) < intDistSide){sideErrorTotal += sideError;} // Anti-integrator windup
   
   differenceError = IR_LF.getReading() - IR_LR.getReading();
-  differenceErrorTotal += differenceError;
-  //if(abs(differenceErrorTotal) < intDistDiff){differenceErrorTotal += abs(differenceError);} // Anti-integrator windup
+  //differenceErrorTotal += differenceError;
+  if(abs(differenceErrorTotal) < intDistDiff){differenceErrorTotal += abs(differenceError);} // Anti-integrator windup
 
 
 
@@ -85,21 +85,32 @@ void Setup() {
 
   double diff_pre = 4*differenceError + 0.01 * differenceErrorTotal;
 
-int minimal = 35;
+int minimal = 30;
 
   if (wall_pre < 0) {
-    wall_pre = constrain(wall_pre, -1000, -minimal);
+        wall_pre -= minimal;
+    
+    //wall_pre = constrain(wall_pre, -1000, -minimal);
   } else {
-    wall_pre = constrain(wall_pre, minimal, 1000);
+       wall_pre += minimal;
+    //wall_pre = constrain(wall_pre, minimal, 1000);
   }
   if (diff_pre < 0) {
-    diff_pre = constrain(diff_pre, -1000, -minimal);
+           diff_pre -= minimal;
+//    diff_pre = constrain(diff_pre, -1000, -minimal);
   } else {
-    diff_pre = constrain(diff_pre, minimal, 1000);
+           diff_pre += minimal;
+//    diff_pre = constrain(diff_pre, minimal, 1000);
   }
+
 
   double wallPower = constrain(wall_pre, -100, 100); //250
   double diffPower = constrain(diff_pre, -250, 250);
+
+  double m1 =  - wallPower - diffPower;
+  double m2 =  + wallPower - diffPower;
+  double m3 =  + wallPower - diffPower;
+  double m4 =  - wallPower - diffPower;
 
   left_font_motor.writeMicroseconds(1500 - wallPower - diffPower);
   left_rear_motor.writeMicroseconds(1500 + wallPower - diffPower);
