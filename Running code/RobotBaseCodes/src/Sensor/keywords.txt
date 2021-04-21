@@ -1,0 +1,7 @@
+Sensor			KEYWORD1
+getSensorType		KEYWORD2
+getReading		KEYWORD2
+setAngle		KEYWORD2
+setOffset		KEYWORD2
+getOffset		KEYWORD2
+initialise		KEYWORD2

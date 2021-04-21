@@ -18,18 +18,28 @@ double min_power_rotate = 20;
 
 //Running Code Variables
 int turnCount = 0;
-int frontTarget = 140;
-int sideTarget = 90;
+int frontTarget = 180; //140 160 170
+int sideTarget = 80; // 85
 int rotateTarget = 90;
 double sideError;
+double sideErrorTotal = 0; 
 double frontError;
 double differenceError;
+double differenceErrorTotal = 0; 
 double rotateError;
+
+double intDistSide = 40; //For ant-integrator windup // 20, 40
+double intDistDiff = 40; // 20, 40, 60, 40 
+
+double sideErrorExit = 1.5; //For exiting setup
+double differenceErrorExit = 1.5;
 
 //Controller Gains
 double F_Kp = 4;  //Forward Controller
-double S_Kp = 7; //Side Controller
-double D_Kp = 2; //Difference Controller
+double S_Kp = 4; //Side Controller, 7
+double S_Ki = 0.2; // 0.3 0.18
+double D_Kp = 4; //Difference Controller //2, 5,4 
+double D_Ki = 0; //1, 2, 4, 5, 10
 double R_Kp = 10;  //Rotation Controller
 
 
@@ -55,19 +65,66 @@ void TaskMain() {
   }  
 }
 
-
+int confirmed = 0;
 void Setup() {
   //Aligns the side of the robot with the wall
-  speed_val = speed_val_setup;  //Increases motor speed
+  //speed_val = speed_val_setup;  //Increases motor speed
 
   //Error calculation
-  sideError = IR_LF.getReading() - (sideTarget + 17);
+  sideError = IR_LF.getReading() - (sideTarget);
+  sideErrorTotal += sideError;
+  //if(abs(sideError) < intDistSide){sideErrorTotal += sideError;} // Anti-integrator windup
+  
   differenceError = IR_LF.getReading() - IR_LR.getReading();
+  differenceErrorTotal += differenceError;
+  //if(abs(differenceErrorTotal) < intDistDiff){differenceErrorTotal += abs(differenceError);} // Anti-integrator windup
 
-  if (differenceError > 20) return ccw();
-  if (sideError > 0) return strafe_left();
 
-  RunningState = STRAIGHT;
+
+  double wall_pre = 4*sideError + 0.01 * sideErrorTotal;
+
+  double diff_pre = 4*differenceError + 0.01 * differenceErrorTotal;
+
+int minimal = 35;
+
+  if (wall_pre < 0) {
+    wall_pre = constrain(wall_pre, -1000, -minimal);
+  } else {
+    wall_pre = constrain(wall_pre, minimal, 1000);
+  }
+  if (diff_pre < 0) {
+    diff_pre = constrain(diff_pre, -1000, -minimal);
+  } else {
+    diff_pre = constrain(diff_pre, minimal, 1000);
+  }
+
+  double wallPower = constrain(wall_pre, -100, 100); //250
+  double diffPower = constrain(diff_pre, -250, 250);
+
+  left_font_motor.writeMicroseconds(1500 - wallPower - diffPower);
+  left_rear_motor.writeMicroseconds(1500 + wallPower - diffPower);
+  right_rear_motor.writeMicroseconds(1500 + wallPower - diffPower);
+  right_font_motor.writeMicroseconds(1500 - wallPower - diffPower);
+
+
+
+  //if (differenceError > 20) return ccw();
+  //if (sideError > 0) return strafe_left();
+  if (abs(differenceError) < differenceErrorExit && abs(sideError) < sideErrorExit) { //&& abs(differenceError) < dfferenceErrorExit) { //UNCOMMENTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+     confirmed += 1;
+    
+ 
+  } else {
+    confirmed = 0;
+  }
+
+  if (confirmed == 10){
+       RunningState = STRAIGHT;
+    sideErrorTotal = 0; 
+    differenceErrorTotal = 0; 
+  }
+
+ 
 
   //Logic to get robot properly aligned for driving straight
 //  if (IR_LF.getReading() > 130 && IR_LR.getReading() > 130) {strafe_left();}
@@ -81,7 +138,6 @@ void Setup() {
 //  }
 }
 
-
 void Straight() {
   //Implements three different P controllers in order to drive the robot straight with minimal deviation
   //Error calculation
@@ -91,11 +147,14 @@ void Straight() {
 
   //Controller power calculation
   double power_front = constrain(F_Kp*frontError, min_power_straight, max_power_staight);
-  double power_side = constrain(S_Kp*sideError, -1*max_power_side, max_power_side) + constrain(D_Kp*differenceError, -1*power_difference, power_difference);
+  double power_side = constrain(abs(2*S_Kp*sideError + S_Ki*sideError), 0, 500); //+ constrain(D_Kp*differenceError, -1*power_difference, power_difference);
+
+  double base_speed_left = (1750 - constrain(abs(4*sideError), 0, 200));
+  double base_speed_right = (1250 + constrain(abs(4*sideError), 0, 200));
 
   //Motor speeds
-  speed_val_left = 1500 + power_front - power_side;
-  speed_val_right = 1500 - power_front - power_side;
+  speed_val_left = base_speed_left - sideError * 2;
+  speed_val_right = base_speed_right - sideError * 2;
 
   Serial.print(power_side); Serial.print(" | "); Serial.println(speed_val_right);
   
@@ -123,6 +182,11 @@ void Rotation() {
   else {
     //FSM state exit condition
     turnCount++;
+
+    confirmed = 0;
+    sideErrorTotal = 0; 
+    differenceErrorTotal = 0; 
+    
     RunningState = SETUP;
   }
 }
