@@ -18,8 +18,8 @@ double min_power_rotate = 20;
 
 //Running Code Variables
 int turnCount = 0;
-int frontTarget = 180; //140 160 170
-int sideTarget = 80; // 85
+int frontTarget = 180;
+int sideTarget = 77; //CHANGED FROM: 80 75
 int rotateTarget = 90;
 double sideError;
 double sideErrorTotal = 0; 
