@@ -19,7 +19,7 @@ double min_power_rotate = 20;
 //Running Code Variables
 int turnCount = 0;
 int frontTarget = 180;
-int sideTarget = 77; //CHANGED FROM: 80 75
+int sideTarget = 75; //CHANGED FROM: 80 75 // IF DRIFT TO RIGHT, REDUCE //IF DRIFT TO LEFT, INCREASE. 77
 int rotateTarget = 90;
 double sideError;
 double sideErrorTotal = 0; 

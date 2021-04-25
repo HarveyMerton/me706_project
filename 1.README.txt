@@ -7,5 +7,6 @@ Group 18: Harvey Merton, Peter Mitchell, Vincent Wong and Hamish Giles
 
 - Running code: 
     - RobotBaseCodes - Codes required to run the robot. 
-    - Sensor.zip - Class that encapsulates all functions required to read all sensor types. 
-	This library must be included before running the code: Arduino>Sketch>Include 			library>Add .ZIP library. 
+    - Sensor.zip - Library that encapsulates all functions required to read all sensor types. This library is referenced in the code. 
+    - Sensor_withInheritance.zip - Library that includes multiple classes. Essentially a divided version of Sensor.zip to make the most of the OOP property of inheritance. This is the class that is discussed in the report (to be implemented into the code in P2).
+	
